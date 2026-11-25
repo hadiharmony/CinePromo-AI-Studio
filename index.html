@@ -1,0 +1,3149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B0A12" />
+  <meta name="description" content="PromoReel Studio AI — Unggah 1 foto produk untuk menghasilkan video promosi pendek yang estetik & dinamis lengkap dengan narasi AI, subtitle kinetik, serta hook, deskripsi & tagar media sosial." />
+  <title>PromoReel Studio AI</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <style>
+    :root {
+      --bg: #0B0A12;
+      --surface: #141220;
+      --surface-hi: #1E1B30;
+      --outline: #362F54;
+      --coral: #FF3D71;
+      --coral-soft: rgba(255, 61, 113, 0.16);
+      --gold: #FFC857;
+      --gold-dark: #231900;
+      --mint: #00E096;
+      --mint-dark: #002619;
+      --crimson: #FF5263;
+      --text: #F6F4FF;
+      --muted: #B5AED1;
+      --radius: 18px;
+      --font-display: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-body: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255, 61, 113, 0.12), transparent 44%),
+        radial-gradient(circle at 88% 8%, rgba(255, 200, 87, 0.08), transparent 40%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, textarea, select {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    .app-shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 16px calc(88px + env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(11, 10, 18, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(54, 47, 84, 0.7);
+      padding: calc(10px + env(safe-area-inset-top)) 0 10px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 61, 113, 0.5);
+    }
+
+    .brand h1 {
+      font-family: var(--font-display);
+      font-size: 1.06rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      letter-spacing: 0.03em;
+    }
+
+    .pill.online { background: rgba(0, 224, 150, 0.14); color: var(--mint); border-color: rgba(0, 224, 150, 0.35); }
+    .pill.offline { background: rgba(255, 200, 87, 0.16); color: var(--gold); border-color: rgba(255, 200, 87, 0.45); }
+    .pill.saving { background: rgba(255, 200, 87, 0.16); color: var(--gold); border-color: rgba(255, 200, 87, 0.45); }
+    .pill.saved { background: rgba(0, 224, 150, 0.14); color: var(--mint); border-color: rgba(0, 224, 150, 0.35); }
+    .pill.failed { background: rgba(255, 82, 99, 0.18); color: var(--crimson); border-color: rgba(255, 82, 99, 0.45); }
+
+    .banner {
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.84rem;
+    }
+    .banner.show { display: flex; }
+    .banner.info { background: rgba(255, 61, 113, 0.14); border: 1px solid rgba(255, 61, 113, 0.42); color: #FFD8E3; }
+    .banner.warn { background: rgba(255, 200, 87, 0.14); border: 1px solid rgba(255, 200, 87, 0.42); color: #FFE8B0; }
+    .banner.err { background: rgba(255, 82, 99, 0.16); border: 1px solid rgba(255, 82, 99, 0.48); color: #FFD0D6; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .card {
+      background: linear-gradient(180deg, rgba(30, 27, 48, 0.92), rgba(20, 18, 32, 0.97));
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .card.highlight { border-color: rgba(255, 61, 113, 0.55); }
+
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: 1.24rem;
+      margin-bottom: 8px;
+    }
+
+    h3 {
+      font-family: var(--font-display);
+      font-size: 1.02rem;
+      margin-bottom: 6px;
+    }
+
+    .muted { color: var(--muted); font-size: 0.85rem; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    input[type="text"], input[type="url"], textarea, select {
+      width: 100%;
+      background: rgba(11, 10, 18, 0.88);
+      border: 1px solid var(--outline);
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 0.92rem;
+      color: var(--text);
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--coral); }
+    textarea { resize: vertical; min-height: 76px; }
+
+    /* Product Photo Dropzone */
+    .dropzone {
+      position: relative;
+      border: 1.5px dashed rgba(255, 61, 113, 0.65);
+      border-radius: 18px;
+      min-height: 205px;
+      background: radial-gradient(circle at 50% 0%, rgba(255, 61, 113, 0.14), rgba(11, 10, 18, 0.85));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 18px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.2s ease, transform 0.15s ease;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--gold);
+      transform: translateY(-1px);
+    }
+    .dropzone.has-image { border-style: solid; border-color: var(--mint); padding: 0; }
+    .dropzone img {
+      width: 100%;
+      max-height: 290px;
+      object-fit: cover;
+      display: block;
+    }
+    .dropzone-overlay {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(11, 10, 18, 0.82);
+      border: 1px solid rgba(255, 200, 87, 0.5);
+      color: var(--gold);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .btn {
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.12s ease, opacity 0.15s ease;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn.primary { background: var(--coral); color: #FFFFFF; }
+    .btn.gold { background: var(--gold); color: var(--gold-dark); }
+    .btn.mint { background: var(--mint); color: var(--mint-dark); }
+    .btn.ghost { background: var(--surface-hi); border-color: var(--outline); color: var(--text); }
+    .btn.danger { background: rgba(255, 82, 99, 0.16); border-color: rgba(255, 82, 99, 0.5); color: var(--crimson); }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 8px 0 12px;
+    }
+
+    .chip {
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--surface-hi);
+      border: 1px solid var(--outline);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .chip.active {
+      background: var(--coral-soft);
+      border-color: var(--coral);
+      color: #FFD6E2;
+      font-weight: 700;
+    }
+
+    /* Kinetic Video Canvas Stage */
+    .stage-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0 12px;
+    }
+    #promoCanvas {
+      width: 100%;
+      max-width: 340px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(255, 61, 113, 0.6);
+      background: #06050B;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55);
+      display: block;
+    }
+    #promoCanvas.wide { max-width: 640px; }
+
+    /* Photo Ads Studio Canvas & Editor Controls */
+    #photoAdCanvas {
+      width: 100%;
+      max-width: 360px;
+      border-radius: 18px;
+      border: 1.5px solid rgba(255, 200, 87, 0.55);
+      background: #06050B;
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.6);
+      display: block;
+    }
+    #photoAdCanvas.wide { max-width: 640px; }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+    .mode-btn {
+      min-height: 54px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid var(--outline);
+      background: var(--surface-hi);
+      color: var(--muted);
+      cursor: pointer;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .mode-btn small { font-size: 0.68rem; font-weight: 500; opacity: 0.8; }
+    .mode-btn.active {
+      background: var(--coral-soft);
+      border-color: var(--coral);
+      color: #FFFFFF;
+    }
+
+    .slider-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .slider-field input[type="range"] {
+      width: 100%;
+      accent-color: var(--gold);
+    }
+    .notice-box {
+      background: rgba(255, 200, 87, 0.09);
+      border: 1px solid rgba(255, 200, 87, 0.35);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      color: #F6E6BC;
+      margin-top: 10px;
+    }
+
+    .item-list { display: flex; flex-direction: column; gap: 10px; }
+    .item-card {
+      background: rgba(11, 10, 18, 0.72);
+      border: 1px solid rgba(54, 47, 84, 0.85);
+      border-radius: 14px;
+      padding: 13px;
+    }
+    .item-card.selected {
+      border-color: var(--coral);
+      background: rgba(255, 61, 113, 0.08);
+    }
+
+    .row-between {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 7px;
+      background: var(--coral-soft);
+      color: var(--gold);
+    }
+    .badge.mint { background: rgba(0, 224, 150, 0.15); color: var(--mint); }
+
+    .hashtag-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0 10px;
+    }
+    .hashtag-pill {
+      background: rgba(255, 61, 113, 0.13);
+      border: 1px solid rgba(255, 61, 113, 0.35);
+      color: #FFD6E2;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      cursor: pointer;
+    }
+
+    pre.code-box {
+      background: #06050B;
+      border: 1px solid var(--outline);
+      border-radius: 12px;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      overflow-x: auto;
+      max-height: 220px;
+      color: #DCD6F7;
+      white-space: pre-wrap;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: rgba(20, 18, 32, 0.96);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--outline);
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      flex: 1;
+      max-width: 185px;
+      min-height: 48px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-btn.active {
+      background: var(--coral-soft);
+      border-color: rgba(255, 61, 113, 0.45);
+      color: var(--coral);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(6, 5, 11, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      width: 100%;
+      max-width: 560px;
+      max-height: 90dvh;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--coral);
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .thumb-mini {
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid var(--outline);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="./icon-192.png" alt="PromoReel Studio AI Logo" />
+        <div>
+          <h1>PromoReel Studio AI</h1>
+          <small id="userLabel">Belum masuk • Hubungkan Firebase untuk Cloud Sync</small>
+        </div>
+      </div>
+      <div class="status-group">
+        <span id="networkPill" class="pill online">ONLINE</span>
+        <span id="savePill" class="pill" style="display:none;">SAVED</span>
+        <button id="retrySaveBtn" class="btn danger" style="display:none; min-height:32px; padding:4px 10px; font-size:0.75rem;">Retry Save</button>
+        <button id="installPwaBtn" class="btn ghost" style="display:none; min-height:34px; padding:4px 12px; font-size:0.78rem;">Install PWA</button>
+        <button id="openConfigBtn" class="btn ghost" style="min-height:34px; padding:4px 12px; font-size:0.78rem;">Cloud &amp; Backend</button>
+        <button id="authBtn" class="btn primary" style="min-height:34px; padding:4px 12px; font-size:0.78rem;">Sign in Google</button>
+      </div>
+    </header>
+
+    <div id="swUpdateBanner" class="banner info">
+      <span>Versi baru <strong>PromoReel Studio AI</strong> tersedia. Muat ulang untuk memperbarui aplikasi.</span>
+      <button id="applySwUpdateBtn" class="btn primary" style="min-height:34px; padding:4px 12px;">Perbarui</button>
+    </div>
+
+    <div id="offlineBanner" class="banner warn">
+      <span><strong>Mode Offline (App Shell Aktif):</strong> Antarmuka &amp; editor tetap tersedia offline. Analisis foto AI, render frame komersial AI, dan sinkronisasi Firebase memerlukan koneksi internet.</span>
+    </div>
+
+    <div id="statusBanner" class="banner">
+      <span id="statusBannerText"></span>
+      <button id="closeStatusBanner" class="btn ghost" style="min-height:30px; padding:2px 10px;">Tutup</button>
+    </div>
+
+    <!-- TAB 1: UPLOAD FOTO PRODUK & GENERATOR AI -->
+    <section id="tab-create" class="tab-panel active">
+      <div class="card highlight">
+        <div class="section-tag">AI Product Video &amp; Photo Ads Studio</div>
+        <h2>Unggah 1 Foto Produk → Video Promosi &amp; Foto Iklan Komersial</h2>
+        <p class="muted" style="margin-bottom:10px;">
+          Pilih mode produksi <strong>VIDEO ADS</strong>, <strong>PHOTO ADS</strong>, atau <strong>BOTH</strong>. Sistem upload produk, AI Product Analysis, My Projects, dan paket Media Sosial terhubung otomatis.
+        </p>
+
+        <div class="section-tag" style="margin-top:6px;">Pilih Mode Produksi</div>
+        <div id="productionModeGrid" class="mode-grid" role="group" aria-label="Mode Produksi">
+          <button type="button" class="mode-btn" data-mode="video"><span>🎬 VIDEO ADS</span><small>Video Promosi</small></button>
+          <button type="button" class="mode-btn" data-mode="photo"><span>🖼️ PHOTO ADS</span><small>Poster &amp; Foto Iklan</small></button>
+          <button type="button" class="mode-btn active" data-mode="both"><span>✨ BOTH</span><small>Video + Foto Ads</small></button>
+        </div>
+
+        <input id="photoFileInput" type="file" accept="image/*" style="display:none;" />
+        <div id="photoDropzone" class="dropzone" tabindex="0" role="button" aria-label="Unggah foto produk">
+          <div id="dropzonePlaceholder">
+            <div style="font-size:1.8rem; margin-bottom:6px;">📸</div>
+            <h3>Ketuk atau Seret Foto Produk ke Sini</h3>
+            <p class="muted">JPG, PNG, WebP • Identitas, logo &amp; kemasan produk asli tetap dipertahankan</p>
+          </div>
+          <img id="photoPreviewImg" alt="Pratinjau foto produk" style="display:none;" />
+          <span id="changePhotoTag" class="dropzone-overlay" style="display:none;">Ganti Foto</span>
+        </div>
+
+        <div class="section-tag" style="margin-top:8px;">Referensi Narasi &amp; Copy Iklan Produk (Opsional)</div>
+        <label class="field">
+          Nama Produk / Brand (Opsional)
+          <input id="productNameInput" type="text" maxlength="120" placeholder="Contoh: Luminance Vit-C Glow Serum 30ml" />
+        </label>
+        <div class="grid-2">
+          <label class="field">
+            Deskripsi Singkat / Keunggulan (Opsional)
+            <textarea id="productDescInput" maxlength="1000" placeholder="Contoh: Botol kaca amber elegan, tekstur ringan cepat meresap."></textarea>
+          </label>
+          <label class="field">
+            Fungsi &amp; Manfaat Utama Produk (Opsional)
+            <textarea id="productBenefitsInput" maxlength="1000" placeholder="Contoh: Mencerahkan kulit kusam dalam 14 hari, aman untuk kulit sensitif."></textarea>
+          </label>
+        </div>
+
+        <div class="section-tag" style="margin-top:4px;">Informasi Harga, Diskon &amp; Promo (Opsional — untuk Photo Ads)</div>
+        <div class="grid-2">
+          <label class="field">
+            Harga Produk (Opsional)
+            <input id="priceTextInput" type="text" maxlength="60" placeholder="Contoh: Rp 149.000" />
+          </label>
+          <label class="field">
+            Diskon (Opsional)
+            <input id="discountTextInput" type="text" maxlength="60" placeholder="Contoh: HEMAT 30%" />
+          </label>
+        </div>
+        <label class="field">
+          Badge Promo / Penawaran Khusus (Opsional)
+          <input id="promoBadgeInput" type="text" maxlength="80" placeholder="Contoh: FLASH SALE • FREE ONGKIR" />
+        </label>
+
+        <div class="grid-2">
+          <label class="field">
+            Template Desain Photo Ads (9 Gaya)
+            <select id="photoTemplateSelect">
+              <option value="luxury">Luxury (Mewah &amp; Elegan)</option>
+              <option value="minimalist">Minimalist (Bersih &amp; Modern)</option>
+              <option value="cinematic">Cinematic (Dramatis &amp; Filmis)</option>
+              <option value="modern_commercial">Modern Commercial (Katalog Komersial)</option>
+              <option value="lifestyle">Lifestyle (Hangat &amp; Natural)</option>
+              <option value="beauty">Beauty (Skincare &amp; Kosmetik)</option>
+              <option value="food">Food (Kuliner &amp; F&amp;B)</option>
+              <option value="fashion">Fashion (Editorial Busana)</option>
+              <option value="technology">Technology (Futuristik &amp; Gadget)</option>
+            </select>
+          </label>
+          <label class="field">
+            Rasio Ekspor Photo Ads
+            <select id="photoAspectSelect">
+              <option value="4:5">4:5 Instagram Feed (1080×1350)</option>
+              <option value="9:16">9:16 Story / Reels / WA (1080×1920)</option>
+              <option value="1:1">1:1 Square Marketplace (1080×1080)</option>
+              <option value="16:9">16:9 Banner / YouTube (1920×1080)</option>
+            </select>
+          </label>
+          <label class="field">
+            Format Video Ads
+            <select id="formatSelect">
+              <option value="reels_9_16">9:16 Reels / TikTok / Shorts</option>
+              <option value="feed_1_1">1:1 Square Feed</option>
+              <option value="youtube_16_9">16:9 YouTube / Iklan</option>
+            </select>
+          </label>
+          <label class="field">
+            Gaya Estetika Video
+            <select id="vibeSelect">
+              <option value="luxury_editorial">Luxury Editorial</option>
+              <option value="dynamic_beat">Dynamic Beat Cut</option>
+              <option value="clean_minimal">Clean Minimal</option>
+              <option value="vibrant_pop">Vibrant Pop</option>
+            </select>
+          </label>
+          <label class="field">
+            Bahasa Narasi &amp; Copy Iklan
+            <select id="langSelect">
+              <option value="id">Bahasa Indonesia</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+          <label class="field">
+            Gaya Subtitle Kinetik
+            <select id="subStyleSelect">
+              <option value="kinetic_pop">Kinetic Pop</option>
+              <option value="luxury_serif">Luxury Editorial</option>
+              <option value="neon_highlight">Neon Highlight</option>
+              <option value="clean_glass">Clean Glass</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button id="generatePromoBtn" class="btn primary">✨ Buat Video + Foto Ads AI Otomatis</button>
+          <button id="createDraftBtn" class="btn ghost">Simpan Draft &amp; Buka Studio</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row-between">
+          <div>
+            <div class="section-tag">Cloud Firestore</div>
+            <h2>Kampanye Video Promosi Tersimpan</h2>
+          </div>
+          <span id="campaignCountBadge" class="badge">0 KAMPANYE</span>
+        </div>
+        <div id="campaignsList" class="item-list">
+          <p class="muted">Masuk dengan Google dan hubungkan Firebase untuk menyinkronkan kampanye video promosi Anda.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: VIDEO PREVIEW, MOTION ENGINE & EXPORT .WEBM -->
+    <section id="tab-video" class="tab-panel">
+      <div class="card highlight">
+        <div class="row-between">
+          <div>
+            <div class="section-tag">Mesin Video Kinetik 30 FPS</div>
+            <h2 id="activeVideoTitle">Belum ada kampanye dipilih</h2>
+          </div>
+          <span id="monitorTimeTag" class="badge">00:00 / 00:00</span>
+        </div>
+
+        <div class="stage-wrap">
+          <canvas id="promoCanvas" width="540" height="960"></canvas>
+        </div>
+
+        <input id="timelineSlider" type="range" min="0" max="1000" value="0" style="width:100%; accent-color:var(--coral); margin-bottom:10px;" />
+
+        <div class="btn-row">
+          <button id="playPauseBtn" class="btn primary">▶ Putar Video</button>
+          <button id="exportWebmBtn" class="btn mint">⬇ Render &amp; Unduh Video (.webm)</button>
+          <button id="remixPacingBtn" class="btn ghost">⚡ Remix Beat AI</button>
+          <button id="genAiFrameBtn" class="btn gold">🎨 Render Frame Iklan AI</button>
+        </div>
+        <p id="musicVibeLine" class="muted" style="margin-top:10px;"></p>
+      </div>
+
+      <div class="card">
+        <div class="section-tag">Timeline Adegan &amp; Narasi</div>
+        <div id="scenesList" class="item-list">
+          <p class="muted">Pilih atau buat kampanye promosi terlebih dahulu.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: AI PRODUCT PHOTO ADS STUDIO & EXPORT PNG/JPEG -->
+    <section id="tab-photo" class="tab-panel">
+      <div class="card highlight">
+        <div class="row-between">
+          <div>
+            <div class="section-tag">AI Product Photo Ads Studio</div>
+            <h2 id="activePhotoTitle">Belum ada kampanye dipilih</h2>
+          </div>
+          <span id="photoResBadge" class="badge">1080×1350 (4:5)</span>
+        </div>
+
+        <div class="row-between" style="margin-top:8px;">
+          <div id="photoVariationsChips" class="chips" style="margin:0;"></div>
+          <button id="genPhotoVarsBtn" class="btn gold" style="min-height:36px; padding:6px 12px; font-size:0.8rem;">✨ 3 Variasi AI Baru</button>
+        </div>
+
+        <div class="stage-wrap">
+          <canvas id="photoAdCanvas" width="540" height="675"></canvas>
+        </div>
+
+        <div class="section-tag">Rasio Format Ekspor</div>
+        <div id="photoAspectChips" class="chips">
+          <button type="button" class="chip" data-aspect="9:16">9:16 Story (1080×1920)</button>
+          <button type="button" class="chip" data-aspect="1:1">1:1 Square (1080×1080)</button>
+          <button type="button" class="chip active" data-aspect="4:5">4:5 Feed (1080×1350)</button>
+          <button type="button" class="chip" data-aspect="16:9">16:9 Banner (1920×1080)</button>
+        </div>
+
+        <div class="btn-row">
+          <button id="downloadPhotoPngBtn" class="btn mint">⬇ Unduh PNG (HD)</button>
+          <button id="downloadPhotoJpegBtn" class="btn primary">⬇ Unduh JPEG (HD)</button>
+          <button id="sharePhotoWaBtn" class="btn gold">💬 Share WhatsApp</button>
+          <button id="sharePhotoSocialBtn" class="btn ghost">📤 Bagikan Sosmed</button>
+        </div>
+
+        <div class="btn-row" style="margin-top:10px;">
+          <button id="genPhotoAiBgBtn" class="btn primary">🎨 AI Background Replacement</button>
+          <button id="resetPhotoAiBgBtn" class="btn ghost">🔄 Pakai Foto Asli + Studio Compositor</button>
+        </div>
+
+        <div class="notice-box" id="photoAiNotice">
+          <strong>Identitas Produk Terjaga &amp; Transparansi AI Image:</strong> Fitur <em>AI Background Replacement</em> menggunakan model gambar Gemini (memerlukan kuota/paket Blaze pada backend Firebase). Jika layanan AI Image sedang dibatasi/offline, <strong>Studio Compositor HD bawaan</strong> tetap bekerja 100% langsung di perangkat — menggabungkan foto produk asli (bentuk, logo, warna &amp; kemasan utuh) dengan latar studio, pencahayaan sinematik, bayangan &amp; refleksi realistis menjadi file <strong>PNG/JPEG siap unduh</strong>.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-tag">9 Template Komersial &amp; 6 Pencahayaan Sinematik</div>
+        <div class="muted" style="margin-bottom:6px;">Template Desain</div>
+        <div id="photoTemplateChips" class="chips">
+          <button type="button" class="chip active" data-tpl="luxury">Luxury</button>
+          <button type="button" class="chip" data-tpl="minimalist">Minimalist</button>
+          <button type="button" class="chip" data-tpl="cinematic">Cinematic</button>
+          <button type="button" class="chip" data-tpl="modern_commercial">Modern Commercial</button>
+          <button type="button" class="chip" data-tpl="lifestyle">Lifestyle</button>
+          <button type="button" class="chip" data-tpl="beauty">Beauty</button>
+          <button type="button" class="chip" data-tpl="food">Food</button>
+          <button type="button" class="chip" data-tpl="fashion">Fashion</button>
+          <button type="button" class="chip" data-tpl="technology">Technology</button>
+        </div>
+
+        <div class="muted" style="margin-bottom:6px;">Cinematic Lighting &amp; Color Grading</div>
+        <div id="photoLightingChips" class="chips">
+          <button type="button" class="chip active" data-light="studio_softbox">Studio Softbox</button>
+          <button type="button" class="chip" data-light="golden_hour">Golden Hour</button>
+          <button type="button" class="chip" data-light="neon_rim">Neon Rim</button>
+          <button type="button" class="chip" data-light="moody_dramatic">Moody Dramatic</button>
+          <button type="button" class="chip" data-light="clean_daylight">Clean Daylight</button>
+          <button type="button" class="chip" data-light="warm_editorial">Warm Editorial</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-tag">Editor Desain Sederhana (Teks, Font, Ukuran, Posisi &amp; Komposisi)</div>
+        <div class="grid-2">
+          <label class="field">
+            Headline Iklan
+            <input id="edHeadlineInput" type="text" maxlength="100" placeholder="Headline singkat &amp; kuat..." />
+          </label>
+          <label class="field">
+            Call To Action (CTA)
+            <input id="edCtaInput" type="text" maxlength="80" placeholder="Pesan Sekarang" />
+          </label>
+        </div>
+        <label class="field">
+          Copy / Subheadline Iklan
+          <textarea id="edSubheadlineInput" rows="2" maxlength="260" placeholder="Kalimat persuasif keunggulan produk..."></textarea>
+        </label>
+        <div class="grid-2">
+          <label class="field">
+            Harga
+            <input id="edPriceInput" type="text" maxlength="60" placeholder="Rp 149.000" />
+          </label>
+          <label class="field">
+            Diskon
+            <input id="edDiscountInput" type="text" maxlength="60" placeholder="DISKON 30%" />
+          </label>
+        </div>
+        <div class="grid-2">
+          <label class="field">
+            Badge Promo
+            <input id="edPromoBadgeInput" type="text" maxlength="80" placeholder="BEST SELLER • FREE ONGKIR" />
+          </label>
+          <label class="field">
+            Prompt Background AI
+            <input id="edBgPromptInput" type="text" maxlength="240" placeholder="Marble podium dengan cahaya golden hour..." />
+          </label>
+        </div>
+        <div class="grid-2">
+          <label class="field">
+            Gaya Font Tipografi
+            <select id="edFontSelect">
+              <option value="editorial_bold">Editorial Bold</option>
+              <option value="luxury_serif">Luxury Serif</option>
+              <option value="modern_sans">Modern Sans</option>
+              <option value="promo_impact">Promo Impact</option>
+            </select>
+          </label>
+          <label class="field">
+            Komposisi Tata Letak
+            <select id="edLayoutSelect">
+              <option value="hero_center">Hero Center Poster</option>
+              <option value="bottom_editorial">Bottom Editorial Card</option>
+              <option value="split_showcase">Split Commercial Showcase</option>
+              <option value="poster_frame">Luxury Poster Frame</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid-2">
+          <label class="slider-field">
+            <span>Ukuran Teks (<strong id="valTextScale">100%</strong>)</span>
+            <input id="edTextScale" type="range" min="0.7" max="1.4" step="0.05" value="1.0" />
+          </label>
+          <label class="slider-field">
+            <span>Ukuran Objek Produk (<strong id="valObjScale">100%</strong>)</span>
+            <input id="edObjScale" type="range" min="0.6" max="1.35" step="0.05" value="1.0" />
+          </label>
+          <label class="slider-field">
+            <span>Posisi Horizontal X (<strong id="valObjX">50%</strong>)</span>
+            <input id="edObjX" type="range" min="0.25" max="0.75" step="0.02" value="0.5" />
+          </label>
+          <label class="slider-field">
+            <span>Posisi Vertikal Y (<strong id="valObjY">46%</strong>)</span>
+            <input id="edObjY" type="range" min="0.25" max="0.72" step="0.02" value="0.46" />
+          </label>
+          <label class="slider-field">
+            <span>Realistic Shadow (<strong id="valShadow">65%</strong>)</span>
+            <input id="edShadow" type="range" min="0" max="1" step="0.05" value="0.65" />
+          </label>
+          <label class="slider-field">
+            <span>Glossy Reflection (<strong id="valReflection">38%</strong>)</span>
+            <input id="edReflection" type="range" min="0" max="0.85" step="0.05" value="0.38" />
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button id="savePhotoAdBtn" class="btn mint">💾 Simpan Desain Foto Ads ke Cloud</button>
+          <button id="resetPhotoEditsBtn" class="btn ghost">Reset Posisi</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: INTEGRASI MEDIA SOSIAL (HOOK, DESKRIPSI, CTA & TAGAR) -->
+    <section id="tab-social" class="tab-panel">
+      <div class="card highlight">
+        <div class="row-between">
+          <div>
+            <div class="section-tag">Integrasi Media Sosial Lengkap</div>
+            <h2>Hook Viral, Deskripsi &amp; Tagar Siap Post</h2>
+          </div>
+          <button id="regenSocialBtn" class="btn gold" style="min-height:38px;">✨ Racik Ulang AI</button>
+        </div>
+
+        <div id="platformChips" class="chips">
+          <button type="button" class="chip active" data-platform="tiktok">TikTok</button>
+          <button type="button" class="chip" data-platform="instagram_reels">Instagram Reels</button>
+          <button type="button" class="chip" data-platform="youtube_shorts">YouTube Shorts</button>
+          <button type="button" class="chip" data-platform="shopee_wa">Shopee / WA</button>
+        </div>
+
+        <label class="field">
+          Hook Pembuka (3 Detik Pertama)
+          <textarea id="socialHookInput" rows="2" maxlength="240" placeholder="Hook viral pembuka video..."></textarea>
+        </label>
+        <label class="field">
+          Deskripsi / Caption Promosi
+          <textarea id="socialCaptionInput" rows="4" maxlength="1200" placeholder="Deskripsi menarik seputar keunggulan & manfaat produk..."></textarea>
+        </label>
+        <label class="field">
+          Call-To-Action (CTA)
+          <input id="socialCtaInput" type="text" maxlength="200" placeholder="Klik keranjang kuning sekarang!" />
+        </label>
+
+        <div class="section-tag" style="margin-top:8px;">Tagar (Ketuk untuk salin, atau tambah baru)</div>
+        <div id="hashtagsContainer" class="hashtag-wrap"></div>
+        <div class="grid-2" style="margin-bottom:10px;">
+          <input id="newHashtagInput" type="text" maxlength="40" placeholder="Tambah tagar, mis. #promohariini" />
+          <button id="addHashtagBtn" class="btn ghost" type="button">+ Tambah Tagar</button>
+        </div>
+
+        <div class="btn-row">
+          <button id="shareSocialBtn" class="btn primary">📤 Bagikan ke Media Sosial</button>
+          <button id="copySocialBtn" class="btn ghost">📋 Salin Hook + Caption + Tagar</button>
+          <button id="saveSocialBtn" class="btn mint">💾 Simpan ke Cloud</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-tag">Brankas Hook Viral AI</div>
+        <div id="hooksVaultList" class="item-list">
+          <p class="muted">Buat kampanye dengan AI untuk membuka variasi hook Curiosity, Pain-Point, Aesthetic &amp; FOMO.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: SUBTITLE KINETIK & EKSPOR SRT/VTT -->
+    <section id="tab-subtitles" class="tab-panel">
+      <div class="card">
+        <div class="section-tag">Subtitle Kinetik Otomatis &amp; Ekspor</div>
+        <div class="grid-2">
+          <label class="field">
+            Gaya Tampilan Subtitle
+            <select id="liveSubStyleSelect">
+              <option value="kinetic_pop">Kinetic Pop</option>
+              <option value="luxury_serif">Luxury Editorial</option>
+              <option value="neon_highlight">Neon Highlight</option>
+              <option value="clean_glass">Clean Glass</option>
+            </select>
+          </label>
+          <label class="field">
+            Format Ekspor
+            <select id="exportFormatSelect">
+              <option value="srt">SubRip (.srt)</option>
+              <option value="vtt">WebVTT (.vtt)</option>
+            </select>
+          </label>
+        </div>
+        <div class="btn-row">
+          <button id="resyncSubsBtn" class="btn primary">🔄 Sync Ulang dari Narasi</button>
+          <button id="copySubsBtn" class="btn ghost">Salin SRT/VTT</button>
+          <button id="downloadSubsBtn" class="btn mint">Unduh File Subtitle</button>
+        </div>
+        <div style="margin-top:14px;">
+          <pre id="subtitleExportPreview" class="code-box">Belum ada subtitle.</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-tag">Daftar Cue Subtitle</div>
+        <div id="subtitlesList" class="item-list"><p class="muted">Belum ada baris subtitle.</p></div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Navigasi PromoReel Studio">
+    <button class="nav-btn active" data-tab="create"><span>Buat</span></button>
+    <button class="nav-btn" data-tab="video"><span>Video</span></button>
+    <button class="nav-btn" data-tab="photo"><span>Foto Ads</span></button>
+    <button class="nav-btn" data-tab="social"><span>Sosmed</span></button>
+    <button class="nav-btn" data-tab="subtitles"><span>Subtitle</span></button>
+  </nav>
+
+  <!-- Firebase & Secure AI Backend Config Modal -->
+  <div id="configModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="configModalTitle">
+    <div class="modal">
+      <div class="section-tag">Konfigurasi Runtime (Tanpa API Key Rahasia di Repo)</div>
+      <h2 id="configModalTitle">Firebase &amp; Secure AI Backend</h2>
+      <p class="muted" style="margin-bottom:12px;">
+        Masukkan konfigurasi publik Firebase Web App Anda dan URL endpoint Cloud Functions v2 dari direktori <code>/backend</code>. API key Gemini tidak pernah disimpan di browser.
+      </p>
+      <label class="field">Firebase API Key (Public Web Config)<input id="cfgApiKey" type="text" placeholder="AIza..." /></label>
+      <label class="field">Firebase Auth Domain<input id="cfgAuthDomain" type="text" placeholder="project-id.firebaseapp.com" /></label>
+      <label class="field">Firebase Project ID<input id="cfgProjectId" type="text" placeholder="project-id" /></label>
+      <label class="field">Firebase Storage Bucket<input id="cfgStorageBucket" type="text" placeholder="project-id.firebasestorage.app" /></label>
+      <label class="field">Firebase App ID<input id="cfgAppId" type="text" placeholder="1:...:web:..." /></label>
+      <label class="field">Firestore Database ID (opsional, untuk named DB)<input id="cfgDbId" type="text" placeholder="ai-studio-android-..." /></label>
+      <label class="field">Secure AI Backend Base URL (Cloud Functions v2 / Cloud Run)<input id="cfgBackendUrl" type="url" placeholder="https://asia-southeast1-project-id.cloudfunctions.net" /></label>
+      <div class="btn-row">
+        <button id="saveConfigBtn" class="btn primary">Simpan &amp; Hubungkan Firebase</button>
+        <button id="closeConfigBtn" class="btn ghost">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      updateDoc,
+      deleteDoc,
+      onSnapshot,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
+
+    const CONFIG_KEY = "promoreel_studio_cfg_v1";
+
+    const state = {
+      config: loadConfig(),
+      app: null,
+      auth: null,
+      db: null,
+      storage: null,
+      user: null,
+      unsubCampaigns: null,
+      campaigns: [],
+      selectedCampaignId: null,
+      selectedPlatform: "tiktok",
+      productionMode: "both",
+      selectedPhotoVarIdx: 0,
+      photoAiBgImages: {},
+      localPhotoDraft: null,
+      uploadedAiDataUrl: "",
+      uploadedCompactPreview: "",
+      uploadedImgElement: null,
+      sceneFrameImages: {},
+      lastFailedWrite: null,
+      isPlaying: false,
+      playheadMs: 0,
+      rafId: null,
+      lastTickTs: 0,
+      deferredPrompt: null,
+      waitingWorker: null
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function loadConfig() {
+      try {
+        const raw = localStorage.getItem(CONFIG_KEY);
+        return raw ? JSON.parse(raw) : {
+          apiKey: "", authDomain: "", projectId: "", storageBucket: "",
+          appId: "", databaseId: "", backendBaseUrl: ""
+        };
+      } catch {
+        return { apiKey: "", authDomain: "", projectId: "", storageBucket: "", appId: "", databaseId: "", backendBaseUrl: "" };
+      }
+    }
+
+    function saveConfig(cfg) {
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+    }
+
+    function setSaveStatus(status, errMsg = "") {
+      const pill = $("savePill");
+      const retry = $("retrySaveBtn");
+      pill.style.display = "inline-flex";
+      pill.className = "pill";
+      retry.style.display = "none";
+      if (status === "SAVING") {
+        pill.classList.add("saving");
+        pill.textContent = "SAVING";
+      } else if (status === "SAVED") {
+        pill.classList.add("saved");
+        pill.textContent = "SAVED";
+      } else if (status === "SAVE FAILED") {
+        pill.classList.add("failed");
+        pill.textContent = "SAVE FAILED";
+        retry.style.display = "inline-flex";
+        if (errMsg) showBanner("err", `SAVE FAILED: ${errMsg}`);
+      }
+    }
+
+    function showBanner(type, message) {
+      const el = $("statusBanner");
+      el.className = `banner show ${type}`;
+      $("statusBannerText").textContent = message;
+    }
+
+    function hideBanner() {
+      $("statusBanner").className = "banner";
+    }
+
+    function updateNetworkUi() {
+      const online = navigator.onLine;
+      const pill = $("networkPill");
+      pill.className = `pill ${online ? "online" : "offline"}`;
+      pill.textContent = online ? "ONLINE" : "OFFLINE SHELL";
+      $("offlineBanner").classList.toggle("show", !online);
+      ["generatePromoBtn", "remixPacingBtn", "genAiFrameBtn", "regenSocialBtn", "genPhotoVarsBtn", "genPhotoAiBgBtn"].forEach((id) => {
+        const btn = $(id);
+        if (btn) btn.disabled = !online;
+      });
+    }
+
+    window.addEventListener("online", updateNetworkUi);
+    window.addEventListener("offline", updateNetworkUi);
+    updateNetworkUi();
+
+    // Service Worker Registration + Reliable Update Banner
+    if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1")) {
+      window.addEventListener("load", async () => {
+        try {
+          const reg = await navigator.serviceWorker.register("./sw.js", { scope: "./" });
+          reg.addEventListener("updatefound", () => {
+            const nw = reg.installing;
+            if (!nw) return;
+            nw.addEventListener("statechange", () => {
+              if (nw.state === "installed" && navigator.serviceWorker.controller) {
+                state.waitingWorker = nw;
+                $("swUpdateBanner").classList.add("show");
+              }
+            });
+          });
+        } catch (err) {
+          console.warn("SW registration skipped:", err);
+        }
+      });
+      navigator.serviceWorker.addEventListener("controllerchange", () => window.location.reload());
+    }
+
+    $("applySwUpdateBtn").addEventListener("click", () => {
+      if (state.waitingWorker) state.waitingWorker.postMessage({ type: "SKIP_WAITING" });
+    });
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      state.deferredPrompt = e;
+      $("installPwaBtn").style.display = "inline-flex";
+    });
+
+    $("installPwaBtn").addEventListener("click", async () => {
+      if (!state.deferredPrompt) return;
+      state.deferredPrompt.prompt();
+      await state.deferredPrompt.userChoice;
+      state.deferredPrompt = null;
+      $("installPwaBtn").style.display = "none";
+    });
+
+    // Image Upload & Resize Utilities
+    function resizeImageFile(file, maxDim, quality) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const ratio = Math.min(1, maxDim / Math.max(img.width, img.height));
+            const w = Math.max(1, Math.round(img.width * ratio));
+            const h = Math.max(1, Math.round(img.height * ratio));
+            const c = document.createElement("canvas");
+            c.width = w;
+            c.height = h;
+            c.getContext("2d").drawImage(img, 0, 0, w, h);
+            resolve({ dataUrl: c.toDataURL("image/jpeg", quality), img });
+          };
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleProductPhotoFile(file) {
+      if (!file || !file.type.startsWith("image/")) {
+        showBanner("warn", "Pilih file gambar produk (JPG, PNG, atau WebP).");
+        return;
+      }
+      try {
+        const aiRes = await resizeImageFile(file, 1024, 0.86);
+        const previewRes = await resizeImageFile(file, 420, 0.74);
+        state.uploadedAiDataUrl = aiRes.dataUrl;
+        state.uploadedCompactPreview = previewRes.dataUrl.slice(0, 145000);
+        state.uploadedImgElement = aiRes.img;
+        if (state.localPhotoDraft) {
+          state.localPhotoDraft.productPhotoPreview = aiRes.dataUrl;
+        }
+
+        $("dropzonePlaceholder").style.display = "none";
+        $("photoPreviewImg").src = aiRes.dataUrl;
+        $("photoPreviewImg").style.display = "block";
+        $("changePhotoTag").style.display = "inline-block";
+        $("photoDropzone").classList.add("has-image");
+        renderPhotoTab();
+        showBanner("info", "Foto produk berhasil dimuat! Pilih VIDEO, PHOTO, atau BOTH lalu klik tombol Generate.");
+      } catch (err) {
+        showBanner("err", `Gagal memproses foto: ${err.message}`);
+      }
+    }
+
+    $("photoDropzone").addEventListener("click", () => $("photoFileInput").click());
+    $("photoDropzone").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("photoFileInput").click(); }
+    });
+    $("photoDropzone").addEventListener("dragover", (e) => { e.preventDefault(); $("photoDropzone").classList.add("dragover"); });
+    $("photoDropzone").addEventListener("dragleave", () => $("photoDropzone").classList.remove("dragover"));
+    $("photoDropzone").addEventListener("drop", (e) => {
+      e.preventDefault();
+      $("photoDropzone").classList.remove("dragover");
+      if (e.dataTransfer.files?.[0]) handleProductPhotoFile(e.dataTransfer.files[0]);
+    });
+    $("photoFileInput").addEventListener("change", (e) => {
+      if (e.target.files?.[0]) handleProductPhotoFile(e.target.files[0]);
+    });
+
+    // Firebase Initialization
+    function initFirebaseFromConfig() {
+      const cfg = state.config;
+      if (!cfg.apiKey || !cfg.projectId || !cfg.appId) return false;
+      try {
+        state.app = getApps().length ? getApps()[0] : initializeApp({
+          apiKey: cfg.apiKey,
+          authDomain: cfg.authDomain || `${cfg.projectId}.firebaseapp.com`,
+          projectId: cfg.projectId,
+          storageBucket: cfg.storageBucket || `${cfg.projectId}.firebasestorage.app`,
+          appId: cfg.appId
+        });
+        state.auth = getAuth(state.app);
+        state.db = cfg.databaseId ? getFirestore(state.app, cfg.databaseId) : getFirestore(state.app);
+        state.storage = getStorage(state.app);
+
+        onAuthStateChanged(state.auth, (user) => {
+          state.user = user;
+          if (state.unsubCampaigns) { state.unsubCampaigns(); state.unsubCampaigns = null; }
+          if (user) {
+            $("userLabel").textContent = `${user.email || user.displayName} • Cloud Sync Aktif`;
+            $("authBtn").textContent = "Sign Out";
+            subscribeCampaigns(user.uid);
+          } else {
+            $("userLabel").textContent = "Silakan Sign in Google untuk Cloud Sync";
+            $("authBtn").textContent = "Sign in Google";
+            state.campaigns = [];
+            state.selectedCampaignId = null;
+            renderAll();
+          }
+        });
+        return true;
+      } catch (err) {
+        showBanner("err", `Gagal inisialisasi Firebase: ${err.message}`);
+        return false;
+      }
+    }
+
+    function subscribeCampaigns(uid) {
+      const colRef = collection(state.db, "users", uid, "promoCampaigns");
+      state.unsubCampaigns = onSnapshot(colRef, (snap) => {
+        const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        list.sort((a, b) => (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0));
+        state.campaigns = list;
+        if (!state.selectedCampaignId && list.length > 0) state.selectedCampaignId = list[0].id;
+        renderAll();
+      }, (err) => {
+        showBanner("err", `Firestore Listener Error: ${err.message}`);
+      });
+    }
+
+    // Timeline & Subtitle Helpers
+    function recalculateTimeline(scenes) {
+      let cursor = 0;
+      const normalized = (scenes || []).slice(0, 20).map((s, idx) => {
+        const dur = Math.max(2, Math.min(20, Math.round(Number(s.durationSec) || 4)));
+        const startSec = cursor;
+        const endSec = startSec + dur;
+        cursor = endSec;
+        return {
+          sceneNumber: idx + 1,
+          beatRole: String(s.beatRole || "Benefit").slice(0, 40),
+          headlineOverlay: String(s.headlineOverlay || "").slice(0, 100),
+          narration: String(s.narration || "").slice(0, 500),
+          visualPrompt: String(s.visualPrompt || "").slice(0, 500),
+          cameraMotion: String(s.cameraMotion || "ZoomIn").slice(0, 40),
+          transition: String(s.transition || "BeatCut").slice(0, 40),
+          durationSec: dur,
+          startSec,
+          endSec,
+          sfxCue: String(s.sfxCue || "Soft whoosh").slice(0, 120)
+        };
+      });
+      return { scenes: normalized, totalDurationSec: Math.min(600, cursor) };
+    }
+
+    function autoBuildSubtitles(scenes, style) {
+      const cues = [];
+      let index = 1;
+      for (const s of scenes) {
+        const words = String(s.narration || "").trim().split(/\s+/).filter(Boolean);
+        if (!words.length) continue;
+        const chunks = [];
+        for (let i = 0; i < words.length; i += 5) chunks.push(words.slice(i, i + 5));
+        const startBase = s.startSec * 1000;
+        const durMs = Math.max(2000, s.durationSec * 1000);
+        const slice = Math.max(500, Math.floor(durMs / chunks.length));
+        chunks.forEach((chunk, idx) => {
+          if (cues.length >= 100) return;
+          const startMs = startBase + idx * slice;
+          const endMs = idx === chunks.length - 1 ? startBase + durMs : startMs + slice;
+          const highlightWord = chunk.reduce((a, b) => (b.length > a.length ? b : a), "").replace(/[.,!?]/g, "");
+          cues.push({
+            index: index++,
+            startMs,
+            endMs,
+            text: chunk.join(" ").slice(0, 160),
+            highlightWord: highlightWord.slice(0, 40),
+            style: style || "kinetic_pop"
+          });
+        });
+      }
+      return cues;
+    }
+
+    function fmtSrt(ms) {
+      const t = Math.max(0, Math.floor(ms));
+      const h = String(Math.floor(t / 3600000)).padStart(2, "0");
+      const m = String(Math.floor((t % 3600000) / 60000)).padStart(2, "0");
+      const s = String(Math.floor((t % 60000) / 1000)).padStart(2, "0");
+      const r = String(t % 1000).padStart(3, "0");
+      return `${h}:${m}:${s},${r}`;
+    }
+
+    function buildSubtitleFile(cues, fmt) {
+      if (!cues || !cues.length) return "";
+      const head = fmt === "vtt" ? "WEBVTT\n\n" : "";
+      return head + cues.map((c, i) => {
+        const a = fmt === "vtt" ? fmtSrt(c.startMs).replace(",", ".") : fmtSrt(c.startMs);
+        const b = fmt === "vtt" ? fmtSrt(c.endMs).replace(",", ".") : fmtSrt(c.endMs);
+        return `${i + 1}\n${a} --> ${b}\n${c.text}`;
+      }).join("\n\n");
+    }
+
+    const VALID_PHOTO_TEMPLATES = ["luxury", "minimalist", "cinematic", "modern_commercial", "lifestyle", "beauty", "food", "fashion", "technology"];
+    const VALID_PHOTO_ASPECTS = ["9:16", "1:1", "4:5", "16:9"];
+    const VALID_LIGHTINGS = ["studio_softbox", "golden_hour", "neon_rim", "moody_dramatic", "clean_daylight", "warm_editorial"];
+    const VALID_FONTS = ["editorial_bold", "luxury_serif", "modern_sans", "promo_impact"];
+    const VALID_LAYOUTS = ["hero_center", "bottom_editorial", "split_showcase", "poster_frame"];
+
+    function sanitizePhotoVariation(v, idx, fallback = {}) {
+      const num = (val, def, min, max) => {
+        const n = Number(val);
+        return Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : def;
+      };
+      return {
+        id: String(v?.id || `var_${idx + 1}`).slice(0, 40),
+        variationName: String(v?.variationName || `Variasi ${idx + 1}`).slice(0, 60),
+        template: VALID_PHOTO_TEMPLATES.includes(v?.template) ? v.template : (fallback.template || "luxury"),
+        aspectRatio: VALID_PHOTO_ASPECTS.includes(v?.aspectRatio) ? v.aspectRatio : (fallback.aspectRatio || "4:5"),
+        headline: String(v?.headline || fallback.productName || "ELEVATE YOUR STYLE").slice(0, 100),
+        subheadline: String(v?.subheadline || fallback.productBenefits || fallback.productDescription || "Kualitas premium untuk hasil terbaik setiap hari.").slice(0, 260),
+        priceText: String(v?.priceText ?? fallback.priceText ?? "").slice(0, 60),
+        discountText: String(v?.discountText ?? fallback.discountText ?? "").slice(0, 60),
+        promoBadgeText: String(v?.promoBadgeText ?? fallback.promoBadgeText ?? "").slice(0, 80),
+        ctaText: String(v?.ctaText || fallback.ctaText || "Pesan Sekarang").slice(0, 80),
+        lightingPreset: VALID_LIGHTINGS.includes(v?.lightingPreset) ? v.lightingPreset : "studio_softbox",
+        fontStyle: VALID_FONTS.includes(v?.fontStyle) ? v.fontStyle : "editorial_bold",
+        layoutStyle: VALID_LAYOUTS.includes(v?.layoutStyle) ? v.layoutStyle : "hero_center",
+        backgroundPrompt: String(v?.backgroundPrompt || "Luxury commercial studio podium with realistic shadow and soft rim glow").slice(0, 260),
+        textSizeScale: num(v?.textSizeScale, 1.0, 0.7, 1.4),
+        objectScale: num(v?.objectScale, 1.0, 0.6, 1.35),
+        objectOffsetX: num(v?.objectOffsetX, 0.5, 0.25, 0.75),
+        objectOffsetY: num(v?.objectOffsetY, 0.46, 0.25, 0.72),
+        shadowIntensity: num(v?.shadowIntensity, 0.65, 0, 1),
+        reflectionIntensity: num(v?.reflectionIntensity, 0.38, 0, 0.85)
+      };
+    }
+
+    function buildDefaultPhotoVariations(info) {
+      const name = (info.productName || "Produk Unggulan").trim();
+      const benefit = (info.productBenefits || info.productDescription || "Kualitas premium dengan detail sempurna untuk keseharian Anda.").trim();
+      const tpl = VALID_PHOTO_TEMPLATES.includes(info.photoTemplate) ? info.photoTemplate : "luxury";
+      const aspect = VALID_PHOTO_ASPECTS.includes(info.photoAspectRatio) ? info.photoAspectRatio : "4:5";
+      const priceText = (info.priceText || "").trim();
+      const discountText = (info.discountText || "").trim();
+      const promoBadgeText = (info.promoBadgeText || "").trim();
+      const ctaText = (info.ctaText || "Pesan Sekarang").trim();
+      return [
+        sanitizePhotoVariation({
+          id: "var_1",
+          variationName: "Hero Poster",
+          template: tpl,
+          aspectRatio: aspect,
+          headline: name.toUpperCase(),
+          subheadline: benefit.slice(0, 110),
+          priceText, discountText, promoBadgeText, ctaText,
+          lightingPreset: "studio_softbox",
+          fontStyle: "editorial_bold",
+          layoutStyle: "hero_center",
+          backgroundPrompt: `Commercial ${tpl} studio pedestal with crisp rim lighting, soft shadow, and subtle reflection`
+        }, 0),
+        sanitizePhotoVariation({
+          id: "var_2",
+          variationName: "Editorial Spotlight",
+          template: tpl === "luxury" ? "cinematic" : "luxury",
+          aspectRatio: aspect,
+          headline: discountText ? `${discountText} HARI INI` : `BARU • ${name.toUpperCase()}`,
+          subheadline: benefit.slice(0, 110),
+          priceText, discountText, promoBadgeText: promoBadgeText || "LIMITED EDITION", ctaText,
+          lightingPreset: "golden_hour",
+          fontStyle: "luxury_serif",
+          layoutStyle: "bottom_editorial",
+          backgroundPrompt: "Warm golden hour luxury marble countertop with soft cinematic depth and specular highlights"
+        }, 1),
+        sanitizePhotoVariation({
+          id: "var_3",
+          variationName: "Commercial Promo",
+          template: tpl === "minimalist" ? "modern_commercial" : "minimalist",
+          aspectRatio: aspect,
+          headline: promoBadgeText || "PILIHAN TERBAIK",
+          subheadline: `${name} — ${benefit.slice(0, 90)}`,
+          priceText, discountText, promoBadgeText, ctaText: "Checkout Sekarang →",
+          lightingPreset: "clean_daylight",
+          fontStyle: "promo_impact",
+          layoutStyle: "poster_frame",
+          backgroundPrompt: "Ultra-clean modern commercial advertising backdrop with crisp studio floor reflection"
+        }, 2)
+      ];
+    }
+
+    // Real Persistent Firestore Operations
+    async function createCampaignInFirestore(data) {
+      if (!state.db || !state.user) {
+        showBanner("warn", "Konfigurasikan Firebase dan Sign in Google terlebih dahulu untuk menyimpan kampanye ke Cloud.");
+        return false;
+      }
+      const docId = `promo_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
+      const { scenes, totalDurationSec } = recalculateTimeline(data.scenes || []);
+      const style = data.subtitleStyle || "kinetic_pop";
+      const subtitles = data.subtitles?.length ? data.subtitles : autoBuildSubtitles(scenes, style);
+      const productionMode = ["video", "photo", "both"].includes(data.productionMode) ? data.productionMode : "both";
+      const rawPhotoAds = Array.isArray(data.photoAds) && data.photoAds.length
+        ? data.photoAds.slice(0, 10).map((v, i) => sanitizePhotoVariation(v, i, data))
+        : buildDefaultPhotoVariations(data);
+
+      const payload = {
+        userId: state.user.uid,
+        title: String(data.title || "Kampanye Promo AI").slice(0, 140),
+        productName: String(data.productName || "Produk Unggulan").slice(0, 120),
+        productDescription: String(data.productDescription || "").slice(0, 1000),
+        productBenefits: String(data.productBenefits || "").slice(0, 1000),
+        productPhotoPreview: String(data.productPhotoPreview || "").slice(0, 150000),
+        productionMode,
+        priceText: String(data.priceText || "").slice(0, 60),
+        discountText: String(data.discountText || "").slice(0, 60),
+        promoBadgeText: String(data.promoBadgeText || "").slice(0, 80),
+        language: ["id", "en"].includes(data.language) ? data.language : "id",
+        format: ["reels_9_16", "feed_1_1", "youtube_16_9"].includes(data.format) ? data.format : "reels_9_16",
+        visualVibe: ["luxury_editorial", "dynamic_beat", "clean_minimal", "vibrant_pop"].includes(data.visualVibe) ? data.visualVibe : "luxury_editorial",
+        subtitleStyle: ["kinetic_pop", "luxury_serif", "neon_highlight", "clean_glass"].includes(style) ? style : "kinetic_pop",
+        status: ["draft", "generated", "edited", "ready"].includes(data.status) ? data.status : "draft",
+        targetAudience: String(data.targetAudience || "").slice(0, 300),
+        musicVibe: String(data.musicVibe || "").slice(0, 160),
+        ctaText: String(data.ctaText || "").slice(0, 160),
+        scenes,
+        subtitles: subtitles.slice(0, 100),
+        socialHooks: (data.socialHooks || []).slice(0, 15),
+        socialPackages: (data.socialPackages || []).slice(0, 8),
+        photoAds: rawPhotoAds,
+        totalDurationSec,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      const op = async () => {
+        setSaveStatus("SAVING");
+        try {
+          await setDoc(doc(state.db, "users", state.user.uid, "promoCampaigns", docId), payload);
+          state.selectedCampaignId = docId;
+          state.lastFailedWrite = null;
+          setSaveStatus("SAVED");
+          return true;
+        } catch (err) {
+          state.lastFailedWrite = op;
+          setSaveStatus("SAVE FAILED", err.message);
+          return false;
+        }
+      };
+      return op();
+    }
+
+    async function updateCurrentCampaign(partial) {
+      const active = getActiveCampaign();
+      if (!active || !state.db || !state.user) return false;
+      const updates = { ...partial, updatedAt: serverTimestamp() };
+      const op = async () => {
+        setSaveStatus("SAVING");
+        try {
+          await updateDoc(doc(state.db, "users", state.user.uid, "promoCampaigns", active.id), updates);
+          state.lastFailedWrite = null;
+          setSaveStatus("SAVED");
+          return true;
+        } catch (err) {
+          state.lastFailedWrite = op;
+          setSaveStatus("SAVE FAILED", err.message);
+          return false;
+        }
+      };
+      return op();
+    }
+
+    async function deleteCampaignFromFirestore(id) {
+      if (!state.db || !state.user) return;
+      const op = async () => {
+        setSaveStatus("SAVING");
+        try {
+          await deleteDoc(doc(state.db, "users", state.user.uid, "promoCampaigns", id));
+          if (state.selectedCampaignId === id) state.selectedCampaignId = null;
+          state.lastFailedWrite = null;
+          setSaveStatus("SAVED");
+        } catch (err) {
+          state.lastFailedWrite = op;
+          setSaveStatus("SAVE FAILED", err.message);
+        }
+      };
+      await op();
+    }
+
+    $("retrySaveBtn").addEventListener("click", () => {
+      if (state.lastFailedWrite) state.lastFailedWrite();
+    });
+
+    // Secure Authenticated Backend Call
+    async function callSecureAiBackend(endpoint, body) {
+      if (!navigator.onLine) throw new Error("Koneksi internet diperlukan untuk fitur AI.");
+      if (!state.config.backendBaseUrl) throw new Error("URL Secure AI Backend belum diatur di menu Cloud & Backend.");
+      if (!state.user) throw new Error("Silakan Sign in Google terlebih dahulu.");
+      const token = await state.user.getIdToken();
+      const base = state.config.backendBaseUrl.replace(/\/+$/, "");
+      const res = await fetch(`${base}/${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || `Backend HTTP ${res.status}`);
+      return json;
+    }
+
+    function getActiveCampaign() {
+      return state.campaigns.find((c) => c.id === state.selectedCampaignId) || state.campaigns[0] || null;
+    }
+
+    // HTML5 Canvas 30fps Kinetic Promo Video Renderer
+    const imageCache = new Map();
+    function getDrawableImage(src) {
+      if (!src) return state.uploadedImgElement;
+      if (imageCache.has(src)) return imageCache.get(src);
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        drawPromoFrame();
+        renderPhotoAdPreview();
+      };
+      img.src = src;
+      imageCache.set(src, img);
+      return img;
+    }
+
+    function drawPromoFrame() {
+      const canvas = $("promoCanvas");
+      const ctx = canvas.getContext("2d");
+      const c = getActiveCampaign();
+      if (!c) {
+        ctx.fillStyle = "#0B0A12";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+
+      // Adapt canvas resolution to selected format
+      const dims = c.format === "youtube_16_9" ? [960, 540]
+        : c.format === "feed_1_1" ? [720, 720]
+        : [540, 960];
+      if (canvas.width !== dims[0] || canvas.height !== dims[1]) {
+        canvas.width = dims[0];
+        canvas.height = dims[1];
+      }
+      canvas.classList.toggle("wide", c.format === "youtube_16_9");
+
+      const W = canvas.width;
+      const H = canvas.height;
+      const totalMs = Math.max(1000, (Number(c.totalDurationSec) || 1) * 1000);
+      const sec = state.playheadMs / 1000;
+      const scenes = c.scenes || [];
+      const activeScene = scenes.find((s) => sec >= s.startSec && sec < s.endSec) || scenes[scenes.length - 1];
+      const activeCue = (c.subtitles || []).find((q) => state.playheadMs >= q.startMs && state.playheadMs <= q.endMs);
+      const progress = activeScene && activeScene.durationSec > 0
+        ? Math.max(0, Math.min(1, (sec - activeScene.startSec) / activeScene.durationSec))
+        : 0;
+
+      // Base obsidian fill
+      ctx.fillStyle = "#08070F";
+      ctx.fillRect(0, 0, W, H);
+
+      // Source image (AI commercial frame for active scene OR uploaded product photo)
+      const frameSrc = activeScene ? state.sceneFrameImages[`${c.id}_${activeScene.sceneNumber}`] : null;
+      const img = getDrawableImage(frameSrc || c.productPhotoPreview);
+
+      if (img && img.complete && img.naturalWidth > 0) {
+        const motion = activeScene?.cameraMotion || "ZoomIn";
+        let scale = 1.06;
+        let tx = 0;
+        let ty = 0;
+        let rot = 0;
+        if (motion === "ZoomIn") { scale = 1.02 + 0.22 * progress; }
+        else if (motion === "KenBurns") { scale = 1.22 - 0.14 * progress; ty = -18 + 36 * progress; }
+        else if (motion === "PulseBeat") { scale = 1.05 + 0.08 * Math.sin(progress * Math.PI * 4); }
+        else if (motion === "ParallaxOrbit") {
+          scale = 1.14;
+          tx = 24 * Math.sin(progress * Math.PI * 2);
+          ty = 12 * Math.cos(progress * Math.PI * 2);
+          rot = (-0.035 + 0.07 * progress);
+        } else if (motion === "WhipPan") {
+          scale = 1.18;
+          tx = -52 + 104 * progress;
+        } else {
+          scale = 1.08 + 0.08 * progress;
+          tx = -30 * (1 - progress);
+        }
+
+        const cover = Math.max(W / img.naturalWidth, H / img.naturalHeight) * scale;
+        const dw = img.naturalWidth * cover;
+        const dh = img.naturalHeight * cover;
+
+        ctx.save();
+        ctx.translate(W / 2 + tx, H / 2 + ty);
+        ctx.rotate(rot);
+        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+        ctx.restore();
+      } else {
+        const grad = ctx.createRadialGradient(W * 0.5, H * 0.4, 20, W * 0.5, H * 0.5, Math.max(W, H) * 0.7);
+        grad.addColorStop(0, "rgba(255, 61, 113, 0.35)");
+        grad.addColorStop(1, "#090812");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      // Editorial Studio Vignette + Light Leak Glow
+      const vig = ctx.createLinearGradient(0, 0, 0, H);
+      vig.addColorStop(0, "rgba(6, 5, 11, 0.58)");
+      vig.addColorStop(0.45, "rgba(6, 5, 11, 0.08)");
+      vig.addColorStop(1, "rgba(6, 5, 11, 0.88)");
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, W, H);
+
+      const flareX = W * (0.2 + 0.6 * progress);
+      const flare = ctx.createRadialGradient(flareX, H * 0.16, 4, flareX, H * 0.16, W * 0.42);
+      flare.addColorStop(0, "rgba(255, 200, 87, 0.22)");
+      flare.addColorStop(1, "rgba(255, 61, 113, 0)");
+      ctx.fillStyle = flare;
+      ctx.fillRect(0, 0, W, H);
+
+      // Top Progress Bar
+      ctx.fillStyle = "rgba(255,255,255,0.22)";
+      ctx.fillRect(24, 20, W - 48, 5);
+      ctx.fillStyle = "#FF3D71";
+      ctx.fillRect(24, 20, (W - 48) * Math.min(1, state.playheadMs / totalMs), 5);
+
+      // Top Beat Pill
+      if (activeScene) {
+        ctx.font = "700 16px monospace";
+        const tag = `SC ${activeScene.sceneNumber} • ${activeScene.beatRole.toUpperCase()} • ${activeScene.cameraMotion}`;
+        const tw = ctx.measureText(tag).width + 24;
+        ctx.fillStyle = "rgba(11, 10, 18, 0.76)";
+        roundRect(ctx, 24, 38, tw, 32, 10);
+        ctx.fill();
+        ctx.fillStyle = "#FFC857";
+        ctx.fillText(tag, 36, 59);
+      }
+
+      // Kinetic Headline Overlay Pill
+      if (activeScene?.headlineOverlay) {
+        const headline = activeScene.headlineOverlay.toUpperCase();
+        ctx.font = `800 ${W >= 720 ? 34 : 26}px "Space Grotesk", system-ui, sans-serif`;
+        const hw = Math.min(W - 48, ctx.measureText(headline).width + 36);
+        const hx = (W - hw) / 2;
+        const hy = H - (activeCue ? 185 : 110);
+        ctx.fillStyle = "rgba(255, 61, 113, 0.92)";
+        roundRect(ctx, hx, hy, hw, 52, 14);
+        ctx.fill();
+        ctx.fillStyle = "#FFFFFF";
+        ctx.textAlign = "center";
+        ctx.fillText(headline, W / 2, hy + 35, W - 76);
+        ctx.textAlign = "left";
+      }
+
+      // Synced Kinetic Subtitle Box
+      if (activeCue?.text) {
+        ctx.font = `700 ${W >= 720 ? 24 : 20}px "Plus Jakarta Sans", system-ui, sans-serif`;
+        const lines = wrapCanvasText(ctx, activeCue.text, W - 72);
+        const boxH = lines.length * 28 + 24;
+        const by = H - boxH - 36;
+        ctx.fillStyle = "rgba(8, 7, 15, 0.78)";
+        roundRect(ctx, 26, by, W - 52, boxH, 14);
+        ctx.fill();
+        ctx.fillStyle = c.subtitleStyle === "neon_highlight" ? "#FFC857" : c.subtitleStyle === "luxury_serif" ? "#FFF2D6" : "#FFFFFF";
+        ctx.textAlign = "center";
+        lines.forEach((line, idx) => {
+          ctx.fillText(line, W / 2, by + 30 + idx * 28, W - 76);
+        });
+        ctx.textAlign = "left";
+      }
+
+      $("timelineSlider").max = String(totalMs);
+      $("timelineSlider").value = String(Math.min(state.playheadMs, totalMs));
+      $("monitorTimeTag").textContent = `${fmtClock(state.playheadMs)} / ${fmtClock(totalMs)}`;
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function wrapCanvasText(ctx, text, maxW) {
+      const words = String(text).split(/\s+/);
+      const lines = [];
+      let cur = "";
+      for (const w of words) {
+        const test = cur ? `${cur} ${w}` : w;
+        if (ctx.measureText(test).width > maxW && cur) {
+          lines.push(cur);
+          cur = w;
+        } else {
+          cur = test;
+        }
+      }
+      if (cur) lines.push(cur);
+      return lines.slice(0, 3);
+    }
+
+    function fmtClock(ms) {
+      const s = Math.floor(ms / 1000);
+      const m = String(Math.floor(s / 60)).padStart(2, "0");
+      const r = String(s % 60).padStart(2, "0");
+      const t = Math.floor((ms % 1000) / 100);
+      return `${m}:${r}.${t}`;
+    }
+
+    function playbackLoop(ts) {
+      if (!state.isPlaying) return;
+      const c = getActiveCampaign();
+      const totalMs = Math.max(1000, (Number(c?.totalDurationSec) || 1) * 1000);
+      if (state.lastTickTs) {
+        state.playheadMs += (ts - state.lastTickTs);
+        if (state.playheadMs >= totalMs) state.playheadMs = 0;
+      }
+      state.lastTickTs = ts;
+      drawPromoFrame();
+      state.rafId = requestAnimationFrame(playbackLoop);
+    }
+
+    function setPlaying(shouldPlay) {
+      state.isPlaying = shouldPlay;
+      $("playPauseBtn").textContent = shouldPlay ? "⏸ Jeda Video" : "▶ Putar Video";
+      if (shouldPlay) {
+        state.lastTickTs = 0;
+        state.rafId = requestAnimationFrame(playbackLoop);
+      } else if (state.rafId) {
+        cancelAnimationFrame(state.rafId);
+      }
+    }
+
+    // Real Browser WebM Video Exporter via MediaRecorder
+    async function exportPromoWebm() {
+      const c = getActiveCampaign();
+      if (!c) return;
+      const canvas = $("promoCanvas");
+      if (typeof canvas.captureStream !== "function" || typeof MediaRecorder === "undefined") {
+        showBanner("warn", "Browser ini belum mendukung perekaman video WebM secara langsung.");
+        return;
+      }
+      setPlaying(false);
+      const totalMs = Math.max(3000, (Number(c.totalDurationSec) || 10) * 1000);
+      const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9")
+        ? "video/webm;codecs=vp9"
+        : "video/webm";
+      const stream = canvas.captureStream(30);
+      const recorder = new MediaRecorder(stream, { mimeType });
+      const chunks = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+
+      $("exportWebmBtn").disabled = true;
+      showBanner("info", `Merender video promosi (${c.totalDurationSec} detik, 30 FPS)... Mohon tunggu hingga selesai.`);
+
+      const done = new Promise((resolve) => {
+        recorder.onstop = () => resolve(new Blob(chunks, { type: mimeType }));
+      });
+
+      state.playheadMs = 0;
+      recorder.start();
+      const startPerf = performance.now();
+
+      await new Promise((resolve) => {
+        function step(now) {
+          const elapsed = now - startPerf;
+          state.playheadMs = Math.min(totalMs, elapsed);
+          drawPromoFrame();
+          if (elapsed < totalMs) {
+            requestAnimationFrame(step);
+          } else {
+            resolve();
+          }
+        }
+        requestAnimationFrame(step);
+      });
+
+      recorder.stop();
+      const blob = await done;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${(c.productName || "promoreel").toLowerCase().replace(/[^a-z0-9]+/g, "_")}_promo.webm`;
+      a.click();
+      URL.revokeObjectURL(url);
+      $("exportWebmBtn").disabled = false;
+      showBanner("info", "Video promosi (.webm) selesai dirender dan diunduh!");
+    }
+
+    // =========================================================================
+    // HIGH-RESOLUTION COMMERCIAL PHOTO ADS COMPOSITOR & REAL PNG/JPEG EXPORTER
+    // =========================================================================
+    const PHOTO_TEMPLATES = {
+      luxury: { bgTop: "#0E0B16", bgMid: "#1B1429", bgBot: "#08060D", floor: "#1D1528", accent: "#E8C37D", accentText: "#1C1200", text: "#FFF9EE", sub: "#D8CEBE", badgeBg: "#E8C37D", badgeTxt: "#1C1200", light: false },
+      minimalist: { bgTop: "#F6F5F1", bgMid: "#EAE7E0", bgBot: "#DDD8CE", floor: "#D2CCC0", accent: "#17171A", accentText: "#FFFFFF", text: "#141418", sub: "#4E4B45", badgeBg: "#17171A", badgeTxt: "#FFFFFF", light: true },
+      cinematic: { bgTop: "#09101C", bgMid: "#122238", bgBot: "#050910", floor: "#0D1A2B", accent: "#FF5C39", accentText: "#FFFFFF", text: "#F5F8FF", sub: "#B8CBE0", badgeBg: "#FF5C39", badgeTxt: "#FFFFFF", light: false },
+      modern_commercial: { bgTop: "#131626", bgMid: "#1E2642", bgBot: "#0D101D", floor: "#182038", accent: "#00E096", accentText: "#002619", text: "#FFFFFF", sub: "#C8D1EB", badgeBg: "#00E096", badgeTxt: "#002619", light: false },
+      lifestyle: { bgTop: "#F5EDE3", bgMid: "#EADBC8", bgBot: "#DBC6AD", floor: "#CEB597", accent: "#9E532F", accentText: "#FFFFFF", text: "#2A1B12", sub: "#5C4334", badgeBg: "#9E532F", badgeTxt: "#FFFFFF", light: true },
+      beauty: { bgTop: "#FFF1F5", bgMid: "#FCE0EA", bgBot: "#F2C6D8", floor: "#E7B4C9", accent: "#B8336A", accentText: "#FFFFFF", text: "#381022", sub: "#6E3550", badgeBg: "#B8336A", badgeTxt: "#FFFFFF", light: true },
+      food: { bgTop: "#241008", bgMid: "#421D0E", bgBot: "#170904", floor: "#30140A", accent: "#FFB830", accentText: "#261200", text: "#FFF8ED", sub: "#F0D5B6", badgeBg: "#FF4E2A", badgeTxt: "#FFFFFF", light: false },
+      fashion: { bgTop: "#18181B", bgMid: "#27272A", bgBot: "#09090B", floor: "#1F1F23", accent: "#F4F4F5", accentText: "#09090B", text: "#FAFAFA", sub: "#C4C4CC", badgeBg: "#FF3D71", badgeTxt: "#FFFFFF", light: false },
+      technology: { bgTop: "#060B18", bgMid: "#0E1D3B", bgBot: "#03060D", floor: "#09152E", accent: "#22D3EE", accentText: "#031D24", text: "#ECFEFF", sub: "#99C2D8", badgeBg: "#22D3EE", badgeTxt: "#031D24", light: false }
+    };
+
+    function getPhotoExportDims(aspectRatio) {
+      if (aspectRatio === "9:16") return [1080, 1920];
+      if (aspectRatio === "1:1") return [1080, 1080];
+      if (aspectRatio === "16:9") return [1920, 1080];
+      return [1080, 1350]; // 4:5 default
+    }
+
+    function getFontFamily(fontStyle) {
+      if (fontStyle === "luxury_serif") return 'Georgia, "Times New Roman", serif';
+      if (fontStyle === "promo_impact") return 'Impact, "Arial Black", "Space Grotesk", sans-serif';
+      if (fontStyle === "modern_sans") return '"Plus Jakarta Sans", system-ui, sans-serif';
+      return '"Space Grotesk", system-ui, sans-serif';
+    }
+
+    function getActivePhotoCampaignOrDraft() {
+      const c = getActiveCampaign();
+      if (c) {
+        if (!Array.isArray(c.photoAds) || !c.photoAds.length) {
+          c.photoAds = buildDefaultPhotoVariations(c);
+        }
+        return c;
+      }
+      if (state.uploadedAiDataUrl || state.localPhotoDraft) {
+        if (!state.localPhotoDraft) {
+          state.localPhotoDraft = {
+            id: "local_draft",
+            title: $("productNameInput").value.trim() || "Draft Photo Ads",
+            productName: $("productNameInput").value.trim() || "Produk Unggulan",
+            productDescription: $("productDescInput").value.trim(),
+            productBenefits: $("productBenefitsInput").value.trim(),
+            priceText: $("priceTextInput").value.trim(),
+            discountText: $("discountTextInput").value.trim(),
+            promoBadgeText: $("promoBadgeInput").value.trim(),
+            productPhotoPreview: state.uploadedAiDataUrl,
+            photoAds: buildDefaultPhotoVariations({
+              productName: $("productNameInput").value.trim(),
+              productDescription: $("productDescInput").value.trim(),
+              productBenefits: $("productBenefitsInput").value.trim(),
+              priceText: $("priceTextInput").value.trim(),
+              discountText: $("discountTextInput").value.trim(),
+              promoBadgeText: $("promoBadgeInput").value.trim(),
+              photoTemplate: $("photoTemplateSelect").value,
+              photoAspectRatio: $("photoAspectSelect").value
+            })
+          };
+        } else if (state.uploadedAiDataUrl && !state.localPhotoDraft.productPhotoPreview) {
+          state.localPhotoDraft.productPhotoPreview = state.uploadedAiDataUrl;
+        }
+        return state.localPhotoDraft;
+      }
+      return null;
+    }
+
+    function getActivePhotoVariation() {
+      const c = getActivePhotoCampaignOrDraft();
+      if (!c) return null;
+      const list = c.photoAds || [];
+      if (!list.length) return null;
+      const idx = Math.max(0, Math.min(list.length - 1, state.selectedPhotoVarIdx));
+      state.selectedPhotoVarIdx = idx;
+      return { campaign: c, variation: list[idx], index: idx };
+    }
+
+    function drawPhotoAdToCanvas(canvas, v, c, highRes = false) {
+      const [fullW, fullH] = getPhotoExportDims(v.aspectRatio);
+      const scaleF = highRes ? 1.0 : 0.5;
+      const W = Math.round(fullW * scaleF);
+      const H = Math.round(fullH * scaleF);
+      if (canvas.width !== W || canvas.height !== H) {
+        canvas.width = W;
+        canvas.height = H;
+      }
+      if (!highRes) canvas.classList.toggle("wide", v.aspectRatio === "16:9");
+
+      const ctx = canvas.getContext("2d");
+      const pal = PHOTO_TEMPLATES[v.template] || PHOTO_TEMPLATES.luxury;
+      const isWide = W > H;
+      const u = Math.min(W, H) / 1080; // normalized design unit
+
+      // 1. Studio Backdrop Gradient
+      const bgGrad = ctx.createLinearGradient(0, 0, W * 0.25, H);
+      bgGrad.addColorStop(0, pal.bgTop);
+      bgGrad.addColorStop(0.55, pal.bgMid);
+      bgGrad.addColorStop(1, pal.bgBot);
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Subtle Studio Horizon / Podium Surface
+      const horizonY = H * (isWide ? 0.68 : 0.62);
+      const floorGrad = ctx.createLinearGradient(0, horizonY, 0, H);
+      floorGrad.addColorStop(0, pal.floor);
+      floorGrad.addColorStop(1, pal.bgBot);
+      ctx.fillStyle = floorGrad;
+      ctx.fillRect(0, horizonY, W, H - horizonY);
+
+      // Subtle horizon shimmer line
+      ctx.strokeStyle = pal.light ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.12)";
+      ctx.lineWidth = Math.max(1, 2 * u);
+      ctx.beginPath();
+      ctx.moveTo(0, horizonY);
+      ctx.lineTo(W, horizonY);
+      ctx.stroke();
+
+      // Template atmospheric glow orbs
+      const keyGlow = ctx.createRadialGradient(W * v.objectOffsetX, H * (v.objectOffsetY - 0.08), 10 * u, W * v.objectOffsetX, H * v.objectOffsetY, Math.max(W, H) * 0.56);
+      keyGlow.addColorStop(0, pal.light ? "rgba(255,255,255,0.65)" : `${pal.accent}33`);
+      keyGlow.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = keyGlow;
+      ctx.fillRect(0, 0, W, H);
+
+      // Technology subtle grid / Luxury editorial corner border
+      if (v.template === "technology") {
+        ctx.strokeStyle = "rgba(34, 211, 238, 0.08)";
+        ctx.lineWidth = Math.max(1, 1.2 * u);
+        const step = 72 * u;
+        for (let gx = 0; gx < W; gx += step) {
+          ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke();
+        }
+        for (let gy = 0; gy < H; gy += step) {
+          ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+        }
+      }
+
+      // 2. Product Visual (AI Replaced Studio Image OR Original Untouched Product Photo + Enhancement)
+      const aiBgKey = `${c.id}_${v.id}`;
+      const aiBgSrc = state.photoAiBgImages[aiBgKey];
+      const baseSrc = (c.id === "local_draft" ? state.uploadedAiDataUrl : null) || state.uploadedAiDataUrl || c.productPhotoPreview;
+      const aiImg = aiBgSrc ? getDrawableImage(aiBgSrc) : null;
+      const prodImg = getDrawableImage(baseSrc);
+
+      const layout = v.layoutStyle || "hero_center";
+      const objCenterX = layout === "split_showcase" && isWide ? W * 0.30 : W * (v.objectOffsetX ?? 0.5);
+      const objCenterY = H * (v.objectOffsetY ?? 0.46);
+
+      if (aiImg && aiImg.complete && aiImg.naturalWidth > 0) {
+        // AI Background Replacement full-bleed stage (exact product preserved by Gemini)
+        const cover = Math.max(W / aiImg.naturalWidth, H / aiImg.naturalHeight);
+        const dw = aiImg.naturalWidth * cover;
+        const dh = aiImg.naturalHeight * cover;
+        ctx.drawImage(aiImg, (W - dw) / 2, (H - dh) / 2, dw, dh);
+      } else if (prodImg && prodImg.complete && prodImg.naturalWidth > 0) {
+        // Local High-Res Studio Compositor (100% original product pixels preserved!)
+        const boxBase = Math.min(W, H) * (isWide ? 0.54 : 0.56) * (v.objectScale ?? 1.0);
+        const ratio = Math.min(boxBase / prodImg.naturalWidth, boxBase / prodImg.naturalHeight);
+        const pw = prodImg.naturalWidth * ratio;
+        const ph = prodImg.naturalHeight * ratio;
+        const px = objCenterX - pw / 2;
+        const py = objCenterY - ph / 2;
+        const cornerR = 26 * u;
+
+        // 2a. Realistic Glossy Reflection underneath product
+        const reflAlpha = Number(v.reflectionIntensity ?? 0.38);
+        if (reflAlpha > 0.02) {
+          ctx.save();
+          ctx.translate(objCenterX, py + ph + 8 * u);
+          ctx.scale(1, -0.42);
+          ctx.globalAlpha = reflAlpha * 0.55;
+          roundRect(ctx, -pw / 2, -ph, pw, ph, cornerR);
+          ctx.clip();
+          ctx.drawImage(prodImg, -pw / 2, -ph, pw, ph);
+          ctx.restore();
+
+          const fadeGrad = ctx.createLinearGradient(0, py + ph, 0, py + ph + ph * 0.45);
+          fadeGrad.addColorStop(0, "rgba(0,0,0,0)");
+          fadeGrad.addColorStop(0.85, pal.floor);
+          fadeGrad.addColorStop(1, pal.bgBot);
+          ctx.fillStyle = fadeGrad;
+          ctx.fillRect(px - 10 * u, py + ph + 2 * u, pw + 20 * u, ph * 0.46);
+        }
+
+        // 2b. Realistic Soft Contact Shadow + Ambient Ground Shadow
+        const shadowAmt = Number(v.shadowIntensity ?? 0.65);
+        if (shadowAmt > 0.02) {
+          ctx.save();
+          const shGrad = ctx.createRadialGradient(
+            objCenterX, py + ph + 10 * u, pw * 0.05,
+            objCenterX, py + ph + 10 * u, pw * 0.62
+          );
+          shGrad.addColorStop(0, `rgba(0, 0, 0, ${0.72 * shadowAmt})`);
+          shGrad.addColorStop(0.55, `rgba(0, 0, 0, ${0.28 * shadowAmt})`);
+          shGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+          ctx.fillStyle = shGrad;
+          ctx.beginPath();
+          ctx.ellipse(objCenterX, py + ph + 10 * u, pw * 0.58, Math.max(14 * u, ph * 0.085), 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        // 2c. Enhanced Original Product Image (subtle commercial contrast/clarity, zero identity distortion)
+        ctx.save();
+        if (shadowAmt > 0.02) {
+          ctx.shadowColor = `rgba(0, 0, 0, ${0.48 * shadowAmt})`;
+          ctx.shadowBlur = 42 * u;
+          ctx.shadowOffsetY = 22 * u;
+        }
+        roundRect(ctx, px, py, pw, ph, cornerR);
+        ctx.fillStyle = pal.bgMid;
+        ctx.fill();
+        ctx.shadowColor = "transparent";
+
+        ctx.save();
+        roundRect(ctx, px, py, pw, ph, cornerR);
+        ctx.clip();
+        if ("filter" in ctx) {
+          ctx.filter = v.lightingPreset === "golden_hour"
+            ? "contrast(1.06) saturate(1.10) brightness(1.03)"
+            : v.lightingPreset === "moody_dramatic"
+              ? "contrast(1.12) saturate(1.04) brightness(0.98)"
+              : "contrast(1.05) saturate(1.07) brightness(1.02)";
+        }
+        ctx.drawImage(prodImg, px, py, pw, ph);
+        ctx.filter = "none";
+        ctx.restore();
+
+        // Crisp studio rim highlight border around product showcase frame
+        ctx.strokeStyle = pal.light ? "rgba(255,255,255,0.85)" : `${pal.accent}66`;
+        ctx.lineWidth = Math.max(1.5, 3 * u);
+        roundRect(ctx, px, py, pw, ph, cornerR);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        // Prompt to upload product photo
+        ctx.fillStyle = pal.sub;
+        ctx.font = `600 ${Math.round(30 * u)}px system-ui, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillText("Unggah Foto Produk di Tab Buat", W / 2, H * 0.46);
+        ctx.textAlign = "left";
+      }
+
+      // 3. Cinematic Lighting & Color Grading Overlay
+      const light = v.lightingPreset || "studio_softbox";
+      if (light === "golden_hour") {
+        const g = ctx.createRadialGradient(W * 0.85, H * 0.12, 10, W * 0.85, H * 0.12, Math.max(W, H) * 0.8);
+        g.addColorStop(0, "rgba(255, 188, 88, 0.34)");
+        g.addColorStop(0.55, "rgba(255, 130, 50, 0.10)");
+        g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+      } else if (light === "neon_rim") {
+        const g1 = ctx.createRadialGradient(W * 0.1, H * 0.2, 5, W * 0.1, H * 0.2, W * 0.65);
+        g1.addColorStop(0, "rgba(255, 61, 113, 0.30)");
+        g1.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g1;
+        ctx.fillRect(0, 0, W, H);
+        const g2 = ctx.createRadialGradient(W * 0.9, H * 0.75, 5, W * 0.9, H * 0.75, W * 0.65);
+        g2.addColorStop(0, "rgba(34, 211, 238, 0.26)");
+        g2.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g2;
+        ctx.fillRect(0, 0, W, H);
+      } else if (light === "moody_dramatic") {
+        const vGrad = ctx.createRadialGradient(W * 0.5, H * 0.45, Math.min(W, H) * 0.18, W * 0.5, H * 0.5, Math.max(W, H) * 0.72);
+        vGrad.addColorStop(0, "rgba(255,255,255,0.05)");
+        vGrad.addColorStop(1, "rgba(0,0,0,0.58)");
+        ctx.fillStyle = vGrad;
+        ctx.fillRect(0, 0, W, H);
+      } else if (light === "warm_editorial") {
+        const wGrad = ctx.createLinearGradient(0, 0, W, H);
+        wGrad.addColorStop(0, "rgba(255, 224, 178, 0.16)");
+        wGrad.addColorStop(1, "rgba(92, 42, 18, 0.16)");
+        ctx.fillStyle = wGrad;
+        ctx.fillRect(0, 0, W, H);
+      } else if (light === "studio_softbox") {
+        const sGrad = ctx.createRadialGradient(W * 0.5, 0, 10, W * 0.5, 0, Math.max(W, H) * 0.68);
+        sGrad.addColorStop(0, "rgba(255,255,255,0.22)");
+        sGrad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = sGrad;
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      // 4. Poster Frame Border (for poster_frame or luxury)
+      if (layout === "poster_frame" || v.template === "luxury") {
+        const pad = 30 * u;
+        ctx.strokeStyle = `${pal.accent}77`;
+        ctx.lineWidth = Math.max(1.5, 3 * u);
+        roundRect(ctx, pad, pad, W - pad * 2, H - pad * 2, 18 * u);
+        ctx.stroke();
+      }
+
+      // 5. Promo Badge (Top-Left) & Discount Ribbon (Top-Right)
+      const margin = 56 * u;
+      const tScale = Number(v.textSizeScale ?? 1.0);
+      const fontFam = getFontFamily(v.fontStyle);
+
+      if (v.promoBadgeText) {
+        const badgeText = v.promoBadgeText.toUpperCase();
+        ctx.font = `800 ${Math.round(24 * u * tScale)}px ${fontFam}`;
+        const bw = Math.min(W * 0.54, ctx.measureText(badgeText).width + 44 * u);
+        const bh = 54 * u * tScale;
+        ctx.fillStyle = pal.badgeBg;
+        roundRect(ctx, margin, margin, bw, bh, 999);
+        ctx.fill();
+        ctx.fillStyle = pal.badgeTxt;
+        ctx.textAlign = "left";
+        ctx.fillText(badgeText, margin + 22 * u, margin + bh * 0.66, bw - 34 * u);
+      }
+
+      if (v.discountText) {
+        const disc = v.discountText.toUpperCase();
+        ctx.font = `900 ${Math.round(26 * u * tScale)}px ${fontFam}`;
+        const dw = Math.min(W * 0.40, ctx.measureText(disc).width + 44 * u);
+        const dh = 58 * u * tScale;
+        ctx.fillStyle = "#FF3D71";
+        roundRect(ctx, W - margin - dw, margin, dw, dh, 16 * u);
+        ctx.fill();
+        ctx.fillStyle = "#FFFFFF";
+        ctx.textAlign = "center";
+        ctx.fillText(disc, W - margin - dw / 2, margin + dh * 0.66, dw - 24 * u);
+        ctx.textAlign = "left";
+      }
+
+      // 6. Editorial Copy Panel (Bottom or Right Split)
+      const isSplitRight = layout === "split_showcase" && isWide;
+      const textX = isSplitRight ? W * 0.56 : margin;
+      const textMaxW = isSplitRight ? W * 0.39 : W - margin * 2;
+      const textAlignMode = isSplitRight ? "left" : (layout === "bottom_editorial" ? "left" : "center");
+      const anchorX = textAlignMode === "center" ? W / 2 : textX;
+
+      // Soft bottom readability scrim (keeps headline/price/CTA ultra-legible over any backdrop)
+      if (!isSplitRight) {
+        const scrimH = H * 0.42;
+        const scrim = ctx.createLinearGradient(0, H - scrimH, 0, H);
+        scrim.addColorStop(0, "rgba(0,0,0,0)");
+        scrim.addColorStop(0.42, pal.light ? "rgba(246,244,239,0.78)" : "rgba(7,6,13,0.78)");
+        scrim.addColorStop(1, pal.light ? "rgba(246,244,239,0.96)" : "rgba(7,6,13,0.95)");
+        ctx.fillStyle = scrim;
+        ctx.fillRect(0, H - scrimH, W, scrimH);
+      }
+
+      // Bottom editorial frosted card if selected
+      if (layout === "bottom_editorial" && !isSplitRight) {
+        const cardH = H * 0.28;
+        ctx.fillStyle = pal.light ? "rgba(255,255,255,0.86)" : "rgba(18,16,30,0.84)";
+        roundRect(ctx, margin - 14 * u, H - cardH - margin + 10 * u, W - (margin - 14 * u) * 2, cardH, 26 * u);
+        ctx.fill();
+        ctx.strokeStyle = `${pal.accent}55`;
+        ctx.lineWidth = Math.max(1, 2 * u);
+        ctx.stroke();
+      }
+
+      ctx.textAlign = textAlignMode;
+
+      // Headline
+      const hlSize = Math.round((isWide ? 62 : 66) * u * tScale);
+      ctx.font = `900 ${hlSize}px ${fontFam}`;
+      const hlLines = wrapCanvasText(ctx, (v.headline || c.productName || "FEATURED PRODUCT").toUpperCase(), textMaxW).slice(0, 2);
+
+      // Subheadline
+      const subSize = Math.round((isWide ? 28 : 30) * u * tScale);
+      ctx.font = `500 ${subSize}px "Plus Jakarta Sans", system-ui, sans-serif`;
+      const subLines = wrapCanvasText(ctx, v.subheadline || "", textMaxW).slice(0, 2);
+
+      let curY = isSplitRight
+        ? H * 0.30
+        : H - margin - (v.ctaText ? 110 * u : 34 * u) - (v.priceText ? 58 * u : 0) - subLines.length * (subSize * 1.32) - hlLines.length * (hlSize * 1.12);
+
+      // Draw Headline
+      ctx.font = `900 ${hlSize}px ${fontFam}`;
+      ctx.fillStyle = pal.text;
+      hlLines.forEach((line) => {
+        curY += hlSize * 1.08;
+        ctx.fillText(line, anchorX, curY, textMaxW);
+      });
+
+      // Draw Subheadline
+      curY += 14 * u;
+      ctx.font = `500 ${subSize}px "Plus Jakarta Sans", system-ui, sans-serif`;
+      ctx.fillStyle = pal.sub;
+      subLines.forEach((line) => {
+        curY += subSize * 1.3;
+        ctx.fillText(line, anchorX, curY, textMaxW);
+      });
+
+      // Draw Price Tag
+      if (v.priceText) {
+        curY += 48 * u;
+        ctx.font = `800 ${Math.round(42 * u * tScale)}px ${fontFam}`;
+        ctx.fillStyle = pal.accent;
+        ctx.fillText(v.priceText, anchorX, curY, textMaxW);
+      }
+
+      // Draw CTA Button Pill
+      if (v.ctaText) {
+        curY += 30 * u;
+        ctx.font = `800 ${Math.round(28 * u * tScale)}px ${fontFam}`;
+        const ctaW = Math.min(textMaxW, Math.max(260 * u, ctx.measureText(v.ctaText).width + 76 * u));
+        const ctaH = 68 * u * tScale;
+        const ctaX = textAlignMode === "center" ? (W - ctaW) / 2 : textX;
+        ctx.fillStyle = pal.accent;
+        roundRect(ctx, ctaX, curY, ctaW, ctaH, 999);
+        ctx.fill();
+        ctx.fillStyle = pal.accentText;
+        ctx.textAlign = "center";
+        ctx.fillText(v.ctaText, ctaX + ctaW / 2, curY + ctaH * 0.64, ctaW - 36 * u);
+      }
+      ctx.textAlign = "left";
+    }
+
+    function renderPhotoAdPreview() {
+      const active = getActivePhotoVariation();
+      const canvas = $("photoAdCanvas");
+      if (!active) {
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#0B0A12";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
+      const { campaign, variation } = active;
+      const [fw, fh] = getPhotoExportDims(variation.aspectRatio);
+      $("photoResBadge").textContent = `${fw}×${fh} (${variation.aspectRatio})`;
+      drawPhotoAdToCanvas(canvas, variation, campaign, false);
+    }
+
+    async function renderHighResPhotoBlob(format = "png") {
+      const active = getActivePhotoVariation();
+      if (!active) {
+        showBanner("warn", "Unggah foto produk atau pilih kampanye terlebih dahulu.");
+        return null;
+      }
+      const { campaign, variation } = active;
+      const offscreen = document.createElement("canvas");
+      drawPhotoAdToCanvas(offscreen, variation, campaign, true);
+      const mime = format === "jpeg" ? "image/jpeg" : "image/png";
+      const quality = format === "jpeg" ? 0.95 : undefined;
+      return new Promise((resolve) => {
+        offscreen.toBlob((blob) => {
+          const slug = (campaign.productName || "promoreel_ad").toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 32);
+          const ratioTag = variation.aspectRatio.replace(":", "x");
+          const ext = format === "jpeg" ? "jpg" : "png";
+          resolve({ blob, mime, filename: `${slug}_${variation.template}_${ratioTag}.${ext}`, campaign, variation });
+        }, mime, quality);
+      });
+    }
+
+    async function downloadPhotoAdFile(format = "png") {
+      const res = await renderHighResPhotoBlob(format);
+      if (!res?.blob) return;
+      const url = URL.createObjectURL(res.blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = res.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      showBanner("info", `Foto iklan HD (${res.filename}) berhasil diunduh!`);
+    }
+
+    async function sharePhotoAd(viaWhatsApp = false) {
+      const res = await renderHighResPhotoBlob("png");
+      if (!res?.blob) return;
+      const text = buildSocialPostText() || [
+        res.variation.headline,
+        res.variation.subheadline,
+        [res.variation.priceText, res.variation.discountText].filter(Boolean).join(" • "),
+        res.variation.ctaText
+      ].filter(Boolean).join("\n\n");
+
+      const file = new File([res.blob], res.filename, { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ title: res.campaign.title || "PromoReel Photo Ad", text, files: [file] });
+          return;
+        } catch (err) {
+          if (err?.name === "AbortError") return;
+        }
+      }
+
+      // Desktop / fallback: download the real PNG file + open WhatsApp or copy caption
+      const url = URL.createObjectURL(res.blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = res.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      if (viaWhatsApp) {
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
+        showBanner("info", "File PNG iklan sudah diunduh & WhatsApp dibuka dengan caption + tagar siap kirim!");
+      } else {
+        try { await navigator.clipboard.writeText(text); } catch {}
+        showBanner("info", "File PNG iklan diunduh & teks Hook + Caption + Tagar disalin ke clipboard!");
+      }
+    }
+
+    function renderPhotoTab() {
+      const active = getActivePhotoVariation();
+      if (!active) {
+        $("activePhotoTitle").textContent = "Unggah foto produk atau pilih kampanye";
+        $("photoVariationsChips").innerHTML = "";
+        renderPhotoAdPreview();
+        return;
+      }
+      const { campaign, variation, index } = active;
+      $("activePhotoTitle").textContent = campaign.title || campaign.productName || "Studio Photo Ads";
+
+      // Variation Switcher Chips
+      const varBox = $("photoVariationsChips");
+      varBox.innerHTML = "";
+      (campaign.photoAds || []).forEach((v, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `chip ${i === index ? "active" : ""}`;
+        btn.textContent = `${i + 1}. ${v.variationName || `Variasi ${i + 1}`}`;
+        btn.addEventListener("click", () => {
+          state.selectedPhotoVarIdx = i;
+          renderPhotoTab();
+        });
+        varBox.appendChild(btn);
+      });
+
+      // Sync Aspect, Template, Lighting chips
+      document.querySelectorAll("#photoAspectChips .chip").forEach((ch) => ch.classList.toggle("active", ch.dataset.aspect === variation.aspectRatio));
+      document.querySelectorAll("#photoTemplateChips .chip").forEach((ch) => ch.classList.toggle("active", ch.dataset.tpl === variation.template));
+      document.querySelectorAll("#photoLightingChips .chip").forEach((ch) => ch.classList.toggle("active", ch.dataset.light === variation.lightingPreset));
+
+      // Sync Editor Inputs
+      $("edHeadlineInput").value = variation.headline || "";
+      $("edSubheadlineInput").value = variation.subheadline || "";
+      $("edPriceInput").value = variation.priceText || "";
+      $("edDiscountInput").value = variation.discountText || "";
+      $("edPromoBadgeInput").value = variation.promoBadgeText || "";
+      $("edCtaInput").value = variation.ctaText || "";
+      $("edBgPromptInput").value = variation.backgroundPrompt || "";
+      $("edFontSelect").value = variation.fontStyle || "editorial_bold";
+      $("edLayoutSelect").value = variation.layoutStyle || "hero_center";
+
+      $("edTextScale").value = String(variation.textSizeScale ?? 1.0);
+      $("valTextScale").textContent = `${Math.round((variation.textSizeScale ?? 1.0) * 100)}%`;
+      $("edObjScale").value = String(variation.objectScale ?? 1.0);
+      $("valObjScale").textContent = `${Math.round((variation.objectScale ?? 1.0) * 100)}%`;
+      $("edObjX").value = String(variation.objectOffsetX ?? 0.5);
+      $("valObjX").textContent = `${Math.round((variation.objectOffsetX ?? 0.5) * 100)}%`;
+      $("edObjY").value = String(variation.objectOffsetY ?? 0.46);
+      $("valObjY").textContent = `${Math.round((variation.objectOffsetY ?? 0.46) * 100)}%`;
+      $("edShadow").value = String(variation.shadowIntensity ?? 0.65);
+      $("valShadow").textContent = `${Math.round((variation.shadowIntensity ?? 0.65) * 100)}%`;
+      $("edReflection").value = String(variation.reflectionIntensity ?? 0.38);
+      $("valReflection").textContent = `${Math.round((variation.reflectionIntensity ?? 0.38) * 100)}%`;
+
+      renderPhotoAdPreview();
+    }
+
+    function mutateActivePhotoVariation(patch) {
+      const active = getActivePhotoVariation();
+      if (!active) return;
+      Object.assign(active.variation, patch);
+      renderPhotoAdPreview();
+    }
+
+    // Rendering UI
+    function esc(s) {
+      return String(s ?? "").replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+    }
+
+    function renderAll() {
+      renderCampaignsList();
+      renderVideoTab();
+      renderPhotoTab();
+      renderSocialTab();
+      renderSubtitlesTab();
+    }
+
+    function renderCampaignsList() {
+      const box = $("campaignsList");
+      $("campaignCountBadge").textContent = `${state.campaigns.length} KAMPANYE`;
+      if (!state.campaigns.length) {
+        box.innerHTML = `<p class="muted">Belum ada kampanye tersimpan. Unggah foto produk di atas untuk membuat Video Ads atau Photo Ads AI.</p>`;
+        return;
+      }
+      box.innerHTML = "";
+      for (const c of state.campaigns) {
+        const modeLabel = (c.productionMode || "video").toUpperCase();
+        const photoCount = Array.isArray(c.photoAds) ? c.photoAds.length : 0;
+        const el = document.createElement("div");
+        el.className = `item-card ${c.id === state.selectedCampaignId ? "selected" : ""}`;
+        el.innerHTML = `
+          <div class="row-between">
+            <div style="display:flex; gap:10px; align-items:center;">
+              ${c.productPhotoPreview ? `<img class="thumb-mini" src="${esc(c.productPhotoPreview)}" alt="${esc(c.productName)}" />` : ""}
+              <div>
+                <strong>${esc(c.title)}</strong>
+                <div class="muted">${esc(c.productName)} • ${(c.scenes || []).length} adegan video • ${photoCount} variasi foto ads</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+              <span class="badge">${esc(modeLabel)}</span>
+              <span class="badge mint">${(c.socialPackages || []).length} Sosmed</span>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn ghost" data-open-video="${esc(c.id)}" style="min-height:36px; padding:6px 12px;">🎬 Buka Video</button>
+            <button class="btn gold" data-open-photo="${esc(c.id)}" style="min-height:36px; padding:6px 12px;">🖼️ Buka Foto Ads</button>
+            <button class="btn danger" data-del="${esc(c.id)}" style="min-height:36px; padding:6px 12px;">Hapus</button>
+          </div>
+        `;
+        el.querySelector(`[data-open-video]`).addEventListener("click", () => {
+          state.selectedCampaignId = c.id;
+          state.playheadMs = 0;
+          renderAll();
+          switchTab("video");
+        });
+        el.querySelector(`[data-open-photo]`).addEventListener("click", () => {
+          state.selectedCampaignId = c.id;
+          state.selectedPhotoVarIdx = 0;
+          renderAll();
+          switchTab("photo");
+        });
+        el.querySelector(`[data-del]`).addEventListener("click", () => deleteCampaignFromFirestore(c.id));
+        box.appendChild(el);
+      }
+    }
+
+    function renderVideoTab() {
+      const c = getActiveCampaign();
+      const list = $("scenesList");
+      if (!c) {
+        $("activeVideoTitle").textContent = "Belum ada kampanye dipilih";
+        $("musicVibeLine").textContent = "";
+        list.innerHTML = `<p class="muted">Pilih atau buat kampanye promosi terlebih dahulu.</p>`;
+        drawPromoFrame();
+        return;
+      }
+      $("activeVideoTitle").textContent = c.title;
+      $("musicVibeLine").textContent = `Musik & Vibe: ${c.musicVibe || "Modern Aesthetic Beat"} • Gaya: ${c.visualVibe} • Format: ${c.format}`;
+      drawPromoFrame();
+
+      list.innerHTML = "";
+      (c.scenes || []).forEach((s, idx) => {
+        const el = document.createElement("div");
+        el.className = "item-card";
+        el.innerHTML = `
+          <div class="row-between">
+            <span class="badge">SC ${s.sceneNumber} • ${esc(s.beatRole)} (${s.startSec}s–${s.endSec}s)</span>
+            <span class="badge mint">${esc(s.cameraMotion)} → ${esc(s.transition)}</span>
+          </div>
+          <label class="field">Headline Overlay<input type="text" data-hl="${idx}" value="${esc(s.headlineOverlay)}" /></label>
+          <label class="field">Narasi Voiceover<textarea data-nar="${idx}">${esc(s.narration)}</textarea></label>
+          <div class="muted" style="margin-bottom:8px;">Visual: ${esc(s.visualPrompt)}</div>
+          <div class="btn-row">
+            <button class="btn ghost" data-jump="${idx}" style="min-height:36px;">Pratinjau</button>
+            <button class="btn primary" data-save-sc="${idx}" style="min-height:36px;">Simpan Adegan</button>
+          </div>
+        `;
+        el.querySelector(`[data-jump]`).addEventListener("click", () => {
+          state.playheadMs = (s.startSec || 0) * 1000;
+          drawPromoFrame();
+        });
+        el.querySelector(`[data-save-sc]`).addEventListener("click", async () => {
+          const next = c.scenes.map((sc, i) => i === idx ? {
+            ...sc,
+            headlineOverlay: el.querySelector(`[data-hl]`).value.trim().slice(0, 100),
+            narration: el.querySelector(`[data-nar]`).value.trim().slice(0, 500)
+          } : sc);
+          const rec = recalculateTimeline(next);
+          const subs = autoBuildSubtitles(rec.scenes, c.subtitleStyle);
+          await updateCurrentCampaign({ scenes: rec.scenes, subtitles: subs, totalDurationSec: rec.totalDurationSec, status: "edited" });
+          showBanner("info", `Adegan ${s.sceneNumber} disimpan ke Cloud Firestore.`);
+        });
+        list.appendChild(el);
+      });
+    }
+
+    function getActiveSocialPkg(c) {
+      const list = c?.socialPackages || [];
+      return list.find((p) => p.platform === state.selectedPlatform) || {
+        platform: state.selectedPlatform,
+        hook: c?.socialHooks?.[0]?.hookText || "",
+        caption: c?.productDescription || "",
+        cta: c?.ctaText || "",
+        hashtags: ["#promoproduk", "#fyp"]
+      };
+    }
+
+    function renderSocialTab() {
+      const c = getActiveCampaign();
+      document.querySelectorAll("#platformChips .chip").forEach((ch) => {
+        ch.classList.toggle("active", ch.dataset.platform === state.selectedPlatform);
+      });
+      if (!c) {
+        $("socialHookInput").value = "";
+        $("socialCaptionInput").value = "";
+        $("socialCtaInput").value = "";
+        $("hashtagsContainer").innerHTML = "";
+        $("hooksVaultList").innerHTML = `<p class="muted">Pilih kampanye terlebih dahulu.</p>`;
+        return;
+      }
+      const pkg = getActiveSocialPkg(c);
+      $("socialHookInput").value = pkg.hook || "";
+      $("socialCaptionInput").value = pkg.caption || "";
+      $("socialCtaInput").value = pkg.cta || "";
+
+      const tagBox = $("hashtagsContainer");
+      tagBox.innerHTML = "";
+      (pkg.hashtags || []).forEach((tag) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "hashtag-pill";
+        btn.textContent = tag.startsWith("#") ? tag : `#${tag}`;
+        btn.addEventListener("click", async () => {
+          await navigator.clipboard.writeText(btn.textContent);
+          showBanner("info", `Disalin: ${btn.textContent}`);
+        });
+        tagBox.appendChild(btn);
+      });
+
+      const vault = $("hooksVaultList");
+      if (!(c.socialHooks || []).length) {
+        vault.innerHTML = `<p class="muted">Klik 'Racik Ulang AI' untuk membuat variasi hook viral.</p>`;
+      } else {
+        vault.innerHTML = "";
+        c.socialHooks.forEach((h) => {
+          const el = document.createElement("div");
+          el.className = "item-card";
+          el.innerHTML = `
+            <div class="row-between">
+              <span class="badge">${esc(h.angle)}</span>
+              <span class="badge mint">Retensi ${h.score || 90}%</span>
+            </div>
+            <p style="margin-bottom:8px;">"${esc(h.hookText)}"</p>
+            <div class="btn-row">
+              <button class="btn ghost" data-use-hook style="min-height:36px;">Pakai Hook Ini</button>
+              <button class="btn ghost" data-copy-hook style="min-height:36px;">Salin</button>
+            </div>
+          `;
+          el.querySelector(`[data-use-hook]`).addEventListener("click", () => {
+            $("socialHookInput").value = h.hookText;
+            saveCurrentSocialPackage();
+          });
+          el.querySelector(`[data-copy-hook]`).addEventListener("click", async () => {
+            await navigator.clipboard.writeText(h.hookText);
+            showBanner("info", "Hook viral disalin.");
+          });
+          vault.appendChild(el);
+        });
+      }
+    }
+
+    async function saveCurrentSocialPackage(extraTag = "") {
+      const c = getActiveCampaign();
+      if (!c) return;
+      const curPkg = getActiveSocialPkg(c);
+      let tags = [...(curPkg.hashtags || [])];
+      if (extraTag) {
+        const clean = extraTag.trim().replace(/\s+/g, "");
+        if (clean) tags = Array.from(new Set([...tags, clean.startsWith("#") ? clean : `#${clean}`])).slice(0, 20);
+      }
+      const nextPkg = {
+        platform: state.selectedPlatform,
+        hook: $("socialHookInput").value.trim().slice(0, 240),
+        caption: $("socialCaptionInput").value.trim().slice(0, 1200),
+        cta: $("socialCtaInput").value.trim().slice(0, 200),
+        hashtags: tags
+      };
+      const existing = c.socialPackages || [];
+      const idx = existing.findIndex((p) => p.platform === state.selectedPlatform);
+      const nextPackages = idx >= 0
+        ? existing.map((p, i) => (i === idx ? nextPkg : p))
+        : [...existing, nextPkg];
+      await updateCurrentCampaign({ socialPackages: nextPackages, status: "ready" });
+      showBanner("info", `Paket media sosial (${state.selectedPlatform}) disimpan ke Cloud!`);
+    }
+
+    function buildSocialPostText() {
+      const c = getActiveCampaign();
+      const tags = (getActiveSocialPkg(c).hashtags || []).map((t) => (t.startsWith("#") ? t : `#${t}`)).join(" ");
+      return [
+        $("socialHookInput").value.trim(),
+        $("socialCaptionInput").value.trim(),
+        $("socialCtaInput").value.trim(),
+        tags
+      ].filter(Boolean).join("\n\n");
+    }
+
+    function renderSubtitlesTab() {
+      const c = getActiveCampaign();
+      const list = $("subtitlesList");
+      if (!c) {
+        $("subtitleExportPreview").textContent = "Belum ada subtitle.";
+        list.innerHTML = `<p class="muted">Belum ada baris subtitle.</p>`;
+        return;
+      }
+      $("liveSubStyleSelect").value = c.subtitleStyle || "kinetic_pop";
+      const fmt = $("exportFormatSelect").value;
+      $("subtitleExportPreview").textContent = buildSubtitleFile(c.subtitles || [], fmt) || "Belum ada subtitle.";
+      list.innerHTML = "";
+      (c.subtitles || []).forEach((cue, idx) => {
+        const row = document.createElement("div");
+        row.className = "item-card";
+        row.innerHTML = `
+          <div class="row-between">
+            <span class="badge">#${cue.index || idx + 1}</span>
+            <span class="muted" style="font-family:var(--font-mono);">${fmtSrt(cue.startMs)} --> ${fmtSrt(cue.endMs)}</span>
+          </div>
+          <div class="grid-2">
+            <input type="text" data-sub-text="${idx}" value="${esc(cue.text)}" />
+            <button class="btn ghost" data-save-sub="${idx}" style="min-height:38px;">Simpan Baris</button>
+          </div>
+        `;
+        row.querySelector(`[data-save-sub]`).addEventListener("click", async () => {
+          const val = row.querySelector(`[data-sub-text]`).value.trim();
+          if (!val) return;
+          const next = c.subtitles.map((q, i) => (i === idx ? { ...q, text: val.slice(0, 160) } : q));
+          await updateCurrentCampaign({ subtitles: next });
+        });
+        list.appendChild(row);
+      });
+    }
+
+    // Navigation & UI Events
+    function switchTab(name) {
+      document.querySelectorAll(".tab-panel").forEach((el) => el.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach((el) => el.classList.remove("active"));
+      $(`tab-${name}`).classList.add("active");
+      document.querySelector(`.nav-btn[data-tab="${name}"]`).classList.add("active");
+      if (name === "video") drawPromoFrame();
+      if (name === "photo") renderPhotoTab();
+    }
+
+    document.querySelectorAll(".nav-btn").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+    document.querySelectorAll("#productionModeGrid .mode-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.productionMode = btn.dataset.mode;
+        document.querySelectorAll("#productionModeGrid .mode-btn").forEach((b) => b.classList.toggle("active", b === btn));
+        $("generatePromoBtn").textContent =
+          state.productionMode === "video" ? "✨ Buat Video Promosi AI Otomatis"
+            : state.productionMode === "photo" ? "✨ Buat Photo Ads AI Otomatis (3 Variasi)"
+            : "✨ Buat Video + Foto Ads AI Otomatis";
+      });
+    });
+
+    document.querySelectorAll("#platformChips .chip").forEach((ch) => {
+      ch.addEventListener("click", () => {
+        state.selectedPlatform = ch.dataset.platform;
+        renderSocialTab();
+      });
+    });
+
+    // Photo Ads Interactive Controls & Visual Editor Bindings
+    document.querySelectorAll("#photoAspectChips .chip").forEach((ch) => {
+      ch.addEventListener("click", () => {
+        mutateActivePhotoVariation({ aspectRatio: ch.dataset.aspect });
+        renderPhotoTab();
+      });
+    });
+    document.querySelectorAll("#photoTemplateChips .chip").forEach((ch) => {
+      ch.addEventListener("click", () => {
+        mutateActivePhotoVariation({ template: ch.dataset.tpl });
+        renderPhotoTab();
+      });
+    });
+    document.querySelectorAll("#photoLightingChips .chip").forEach((ch) => {
+      ch.addEventListener("click", () => {
+        mutateActivePhotoVariation({ lightingPreset: ch.dataset.light });
+        renderPhotoTab();
+      });
+    });
+
+    [
+      ["edHeadlineInput", "headline"],
+      ["edSubheadlineInput", "subheadline"],
+      ["edPriceInput", "priceText"],
+      ["edDiscountInput", "discountText"],
+      ["edPromoBadgeInput", "promoBadgeText"],
+      ["edCtaInput", "ctaText"],
+      ["edBgPromptInput", "backgroundPrompt"]
+    ].forEach(([id, key]) => {
+      $(id).addEventListener("input", (e) => mutateActivePhotoVariation({ [key]: e.target.value }));
+    });
+    $("edFontSelect").addEventListener("change", (e) => mutateActivePhotoVariation({ fontStyle: e.target.value }));
+    $("edLayoutSelect").addEventListener("change", (e) => mutateActivePhotoVariation({ layoutStyle: e.target.value }));
+
+    [
+      ["edTextScale", "textSizeScale", "valTextScale"],
+      ["edObjScale", "objectScale", "valObjScale"],
+      ["edObjX", "objectOffsetX", "valObjX"],
+      ["edObjY", "objectOffsetY", "valObjY"],
+      ["edShadow", "shadowIntensity", "valShadow"],
+      ["edReflection", "reflectionIntensity", "valReflection"]
+    ].forEach(([id, key, labelId]) => {
+      $(id).addEventListener("input", (e) => {
+        const val = Number(e.target.value);
+        $(labelId).textContent = `${Math.round(val * 100)}%`;
+        mutateActivePhotoVariation({ [key]: val });
+      });
+    });
+
+    $("resetPhotoEditsBtn").addEventListener("click", () => {
+      mutateActivePhotoVariation({
+        textSizeScale: 1.0, objectScale: 1.0, objectOffsetX: 0.5, objectOffsetY: 0.46,
+        shadowIntensity: 0.65, reflectionIntensity: 0.38
+      });
+      renderPhotoTab();
+    });
+
+    $("savePhotoAdBtn").addEventListener("click", async () => {
+      const c = getActiveCampaign();
+      if (!c) {
+        showBanner("warn", "Masuk ke Firebase terlebih dahulu untuk menyimpan ke Cloud. Anda tetap dapat mengunduh file PNG/JPEG langsung sekarang.");
+        return;
+      }
+      const sanitized = (c.photoAds || []).slice(0, 10).map((v, i) => sanitizePhotoVariation(v, i, c));
+      const ok = await updateCurrentCampaign({ photoAds: sanitized, status: "ready" });
+      if (ok) showBanner("info", "Semua variasi & desain Photo Ads disimpan ke Cloud Firestore!");
+    });
+
+    $("downloadPhotoPngBtn").addEventListener("click", () => downloadPhotoAdFile("png"));
+    $("downloadPhotoJpegBtn").addEventListener("click", () => downloadPhotoAdFile("jpeg"));
+    $("sharePhotoWaBtn").addEventListener("click", () => sharePhotoAd(true));
+    $("sharePhotoSocialBtn").addEventListener("click", () => sharePhotoAd(false));
+
+    $("genPhotoVarsBtn").addEventListener("click", async () => {
+      const active = getActivePhotoVariation();
+      if (!active) return showBanner("warn", "Unggah foto produk atau pilih kampanye terlebih dahulu.");
+      const { campaign, variation } = active;
+      $("genPhotoVarsBtn").disabled = true;
+      showBanner("info", "AI menyusun 3 variasi desain Photo Ads baru dengan headline & copy komersial...");
+      try {
+        const res = await callSecureAiBackend("apiGeneratePhotoVariations", {
+          photoBase64: state.uploadedAiDataUrl || campaign.productPhotoPreview,
+          productName: campaign.productName,
+          productDescription: campaign.productDescription,
+          productBenefits: campaign.productBenefits,
+          priceText: variation.priceText || campaign.priceText || "",
+          discountText: variation.discountText || campaign.discountText || "",
+          promoBadgeText: variation.promoBadgeText || campaign.promoBadgeText || "",
+          preferredTemplate: variation.template,
+          aspectRatio: variation.aspectRatio,
+          language: campaign.language || $("langSelect").value
+        });
+        const nextVars = (res.photoAds || []).slice(0, 10).map((v, i) => sanitizePhotoVariation(v, i, campaign));
+        if (nextVars.length) {
+          campaign.photoAds = nextVars;
+          state.selectedPhotoVarIdx = 0;
+          if (getActiveCampaign()) {
+            await updateCurrentCampaign({ photoAds: nextVars, status: "edited" });
+          }
+          renderPhotoTab();
+          showBanner("info", `${nextVars.length} variasi Photo Ads baru siap diedit & diunduh!`);
+        }
+      } catch (err) {
+        showBanner("err", `Variasi AI gagal: ${err.message}`);
+      } finally {
+        $("genPhotoVarsBtn").disabled = !navigator.onLine;
+      }
+    });
+
+    $("genPhotoAiBgBtn").addEventListener("click", async () => {
+      const active = getActivePhotoVariation();
+      if (!active) return showBanner("warn", "Unggah foto produk atau pilih kampanye terlebih dahulu.");
+      const { campaign, variation } = active;
+      const srcPhoto = state.uploadedAiDataUrl || campaign.productPhotoPreview;
+      if (!srcPhoto) return showBanner("warn", "Unggah foto produk terlebih dahulu untuk AI Background Replacement.");
+
+      $("genPhotoAiBgBtn").disabled = true;
+      showBanner("info", "AI mengganti latar studio & pencahayaan sembari menjaga keaslian produk...");
+      try {
+        const res = await callSecureAiBackend("apiGeneratePhotoAdBg", {
+          photoBase64: srcPhoto,
+          productName: campaign.productName,
+          template: variation.template,
+          lightingPreset: variation.lightingPreset,
+          aspectRatio: variation.aspectRatio,
+          backgroundPrompt: variation.backgroundPrompt
+        });
+        const dataUrl = `data:${res.mimeType};base64,${res.base64Image}`;
+        state.photoAiBgImages[`${campaign.id}_${variation.id}`] = dataUrl;
+        const img = getDrawableImage(dataUrl);
+        img.onload = () => renderPhotoAdPreview();
+        renderPhotoAdPreview();
+        showBanner("info", "AI Background Replacement selesai! Unduh PNG atau JPEG beresolusi HD sekarang.");
+      } catch (err) {
+        showBanner("warn", `AI Background Replacement tidak tersedia (${err.message}). Studio Compositor HD bawaan tetap aktif dengan foto produk asli Anda & siap diunduh PNG/JPEG!`);
+      } finally {
+        $("genPhotoAiBgBtn").disabled = !navigator.onLine;
+      }
+    });
+
+    $("resetPhotoAiBgBtn").addEventListener("click", () => {
+      const active = getActivePhotoVariation();
+      if (!active) return;
+      delete state.photoAiBgImages[`${active.campaign.id}_${active.variation.id}`];
+      renderPhotoAdPreview();
+      showBanner("info", "Kembali ke foto produk asli dengan Studio Compositor HD (identitas produk 100% utuh).");
+    });
+
+    $("closeStatusBanner").addEventListener("click", hideBanner);
+
+    $("openConfigBtn").addEventListener("click", () => {
+      $("cfgApiKey").value = state.config.apiKey || "";
+      $("cfgAuthDomain").value = state.config.authDomain || "";
+      $("cfgProjectId").value = state.config.projectId || "";
+      $("cfgStorageBucket").value = state.config.storageBucket || "";
+      $("cfgAppId").value = state.config.appId || "";
+      $("cfgDbId").value = state.config.databaseId || "";
+      $("cfgBackendUrl").value = state.config.backendBaseUrl || "";
+      $("configModal").classList.add("open");
+    });
+    $("closeConfigBtn").addEventListener("click", () => $("configModal").classList.remove("open"));
+    $("saveConfigBtn").addEventListener("click", () => {
+      state.config = {
+        apiKey: $("cfgApiKey").value.trim(),
+        authDomain: $("cfgAuthDomain").value.trim(),
+        projectId: $("cfgProjectId").value.trim(),
+        storageBucket: $("cfgStorageBucket").value.trim(),
+        appId: $("cfgAppId").value.trim(),
+        databaseId: $("cfgDbId").value.trim(),
+        backendBaseUrl: $("cfgBackendUrl").value.trim()
+      };
+      saveConfig(state.config);
+      $("configModal").classList.remove("open");
+      if (initFirebaseFromConfig()) {
+        showBanner("info", "Konfigurasi Firebase & Backend tersimpan. Klik Sign in Google untuk mulai.");
+      }
+    });
+
+    $("authBtn").addEventListener("click", async () => {
+      if (!state.auth) { $("openConfigBtn").click(); return; }
+      try {
+        if (state.user) await signOut(state.auth);
+        else await signInWithPopup(state.auth, new GoogleAuthProvider());
+      } catch (err) {
+        showBanner("err", `Auth Error: ${err.message}`);
+      }
+    });
+
+    $("generatePromoBtn").addEventListener("click", async () => {
+      const productName = $("productNameInput").value.trim();
+      const productDescription = $("productDescInput").value.trim();
+      const productBenefits = $("productBenefitsInput").value.trim();
+      const priceText = $("priceTextInput").value.trim();
+      const discountText = $("discountTextInput").value.trim();
+      const promoBadgeText = $("promoBadgeInput").value.trim();
+      const photoTemplate = $("photoTemplateSelect").value;
+      const photoAspectRatio = $("photoAspectSelect").value;
+
+      if (!state.uploadedAiDataUrl && !productName && !productDescription) {
+        return showBanner("warn", "Unggah foto produk terlebih dahulu (atau isi minimal nama/deskripsi produk).");
+      }
+      $("generatePromoBtn").disabled = true;
+      showBanner("info", "AI menganalisis foto produk & menyusun Video Ads, Photo Ads (3 variasi) + kit media sosial...");
+      try {
+        const res = await callSecureAiBackend("apiGeneratePromo", {
+          photoBase64: state.uploadedAiDataUrl,
+          productName,
+          productDescription,
+          productBenefits,
+          priceText,
+          discountText,
+          promoBadgeText,
+          productionMode: state.productionMode,
+          photoTemplate,
+          photoAspectRatio,
+          language: $("langSelect").value,
+          format: $("formatSelect").value,
+          visualVibe: $("vibeSelect").value,
+          subtitleStyle: $("subStyleSelect").value
+        });
+        await createCampaignInFirestore({
+          ...res,
+          productionMode: state.productionMode,
+          priceText,
+          discountText,
+          promoBadgeText,
+          photoTemplate,
+          photoAspectRatio,
+          productDescription: productDescription || res.productSummary || "",
+          productBenefits,
+          productPhotoPreview: state.uploadedCompactPreview,
+          language: $("langSelect").value,
+          format: $("formatSelect").value,
+          visualVibe: $("vibeSelect").value,
+          subtitleStyle: $("subStyleSelect").value,
+          status: "generated"
+        });
+        state.selectedPhotoVarIdx = 0;
+        showBanner("info", "Kampanye promosi AI berhasil dibuat & disimpan ke Cloud Firestore!");
+        if (state.productionMode === "photo") {
+          switchTab("photo");
+        } else {
+          switchTab("video");
+          setPlaying(true);
+        }
+      } catch (err) {
+        showBanner("err", err.message);
+      } finally {
+        $("generatePromoBtn").disabled = !navigator.onLine;
+      }
+    });
+
+    $("createDraftBtn").addEventListener("click", async () => {
+      const name = $("productNameInput").value.trim() || "Produk Unggulan";
+      const desc = $("productDescInput").value.trim();
+      const ben = $("productBenefitsInput").value.trim();
+      const priceText = $("priceTextInput").value.trim();
+      const discountText = $("discountTextInput").value.trim();
+      const promoBadgeText = $("promoBadgeInput").value.trim();
+      const photoTemplate = $("photoTemplateSelect").value;
+      const photoAspectRatio = $("photoAspectSelect").value;
+      const draftData = {
+        title: `Promo ${name}`,
+        productName: name,
+        productDescription: desc,
+        productBenefits: ben,
+        priceText,
+        discountText,
+        promoBadgeText,
+        productionMode: state.productionMode,
+        photoTemplate,
+        photoAspectRatio,
+        productPhotoPreview: state.uploadedCompactPreview,
+        language: $("langSelect").value,
+        format: $("formatSelect").value,
+        visualVibe: $("vibeSelect").value,
+        subtitleStyle: $("subStyleSelect").value,
+        status: "draft",
+        musicVibe: "Modern Aesthetic Beat 120 BPM",
+        ctaText: "Checkout sekarang mumpung promo masih berlangsung!",
+        scenes: [
+          { sceneNumber: 1, beatRole: "Hook", headlineOverlay: "WAJIB PUNYA!", narration: `Kenalan dengan ${name} untuk keseharian lebih estetik.`, visualPrompt: "Hero studio lighting", cameraMotion: "ZoomIn", transition: "BeatCut", durationSec: 4, sfxCue: "Bass hit" },
+          { sceneNumber: 2, beatRole: "Benefit", headlineOverlay: "MANFAAT NYATA", narration: ben || desc || "Kualitas premium, nyaman digunakan setiap hari.", visualPrompt: "Parallax texture close-up", cameraMotion: "ParallaxOrbit", transition: "LightLeak", durationSec: 5, sfxCue: "Soft whoosh" },
+          { sceneNumber: 3, beatRole: "CTA", headlineOverlay: "PESAN SEKARANG", narration: "Klik link di bio atau keranjang kuning sekarang juga!", visualPrompt: "Golden rim hero finish", cameraMotion: "PulseBeat", transition: "FlashFade", durationSec: 4, sfxCue: "Sparkle chime" }
+        ],
+        photoAds: buildDefaultPhotoVariations({ productName: name, productDescription: desc, productBenefits: ben, priceText, discountText, promoBadgeText, photoTemplate, photoAspectRatio }),
+        socialPackages: [
+          { platform: "tiktok", hook: `Jangan skip kalau kamu cari ${name}!`, caption: desc || `${name} bikin hari-harimu makin praktis & estetik.`, cta: "Klik keranjang kuning sekarang!", hashtags: ["#promoproduk", "#fyp", "#rekomendasi"] }
+        ]
+      };
+      const ok = await createCampaignInFirestore(draftData);
+      if (!ok) {
+        // Allow immediate local Photo Ads studio usage even before Firebase sign-in
+        state.localPhotoDraft = { id: "local_draft", ...draftData, productPhotoPreview: state.uploadedAiDataUrl };
+        state.selectedPhotoVarIdx = 0;
+        if (state.productionMode === "photo" || state.uploadedAiDataUrl) {
+          switchTab("photo");
+          showBanner("info", "Dibuka di Studio Photo Ads lokal (siap edit & unduh PNG/JPEG). Sign in Google untuk sinkronisasi Cloud.");
+        }
+        return;
+      }
+      state.selectedPhotoVarIdx = 0;
+      if (state.productionMode === "photo") {
+        switchTab("photo");
+      } else {
+        switchTab("video");
+        setPlaying(true);
+      }
+    });
+
+    $("playPauseBtn").addEventListener("click", () => setPlaying(!state.isPlaying));
+    $("exportWebmBtn").addEventListener("click", exportPromoWebm);
+    $("timelineSlider").addEventListener("input", (e) => {
+      state.playheadMs = Number(e.target.value) || 0;
+      drawPromoFrame();
+    });
+
+    $("remixPacingBtn").addEventListener("click", async () => {
+      const c = getActiveCampaign();
+      if (!c) return;
+      showBanner("info", "AI me-remix tempo beat, gerakan kamera & headline dinamis...");
+      try {
+        const res = await callSecureAiBackend("apiRemixPromoPacing", {
+          productName: c.productName,
+          productBenefits: c.productBenefits,
+          visualVibe: c.visualVibe,
+          format: c.format,
+          language: c.language,
+          scenes: c.scenes || []
+        });
+        const rec = recalculateTimeline(res.scenes || c.scenes);
+        const subs = autoBuildSubtitles(rec.scenes, c.subtitleStyle);
+        await updateCurrentCampaign({ musicVibe: res.musicVibe || c.musicVibe, scenes: rec.scenes, subtitles: subs, totalDurationSec: rec.totalDurationSec, status: "edited" });
+        showBanner("info", "Remix tempo & transisi AI selesai!");
+      } catch (err) {
+        showBanner("err", err.message);
+      }
+    });
+
+    $("genAiFrameBtn").addEventListener("click", async () => {
+      const c = getActiveCampaign();
+      if (!c || !(c.scenes || []).length) return;
+      const sec = state.playheadMs / 1000;
+      const sc = c.scenes.find((s) => sec >= s.startSec && sec < s.endSec) || c.scenes[0];
+      showBanner("info", `AI merender frame iklan komersial untuk Adegan ${sc.sceneNumber}...`);
+      try {
+        const res = await callSecureAiBackend("apiGeneratePromoFrame", {
+          photoBase64: state.uploadedAiDataUrl || c.productPhotoPreview,
+          productName: c.productName,
+          visualVibe: c.visualVibe,
+          visualPrompt: sc.visualPrompt
+        });
+        const dataUrl = `data:${res.mimeType};base64,${res.base64Image}`;
+        state.sceneFrameImages[`${c.id}_${sc.sceneNumber}`] = dataUrl;
+        if (state.storage && state.user) {
+          try {
+            const pRef = storageRef(state.storage, `users/${state.user.uid}/promoCampaigns/${c.id}/scene_${sc.sceneNumber}.png`);
+            await uploadString(pRef, dataUrl, "data_url");
+            state.sceneFrameImages[`${c.id}_${sc.sceneNumber}`] = await getDownloadURL(pRef);
+          } catch (stErr) {
+            console.warn("Optional Storage persist skipped:", stErr);
+          }
+        }
+        drawPromoFrame();
+        showBanner("info", `Frame iklan komersial AI untuk Adegan ${sc.sceneNumber} siap!`);
+      } catch (err) {
+        showBanner("err", err.message);
+      }
+    });
+
+    $("regenSocialBtn").addEventListener("click", async () => {
+      const c = getActiveCampaign();
+      if (!c) return;
+      showBanner("info", "AI meracik ulang hook viral, deskripsi & tagar lintas platform...");
+      try {
+        const res = await callSecureAiBackend("apiRegenerateSocialKit", {
+          productName: c.productName,
+          title: c.title,
+          productDescription: c.productDescription,
+          productBenefits: c.productBenefits,
+          targetAudience: c.targetAudience,
+          visualVibe: c.visualVibe,
+          language: c.language
+        });
+        await updateCurrentCampaign({
+          ctaText: res.ctaText || c.ctaText,
+          socialHooks: res.socialHooks || [],
+          socialPackages: res.socialPackages || [],
+          status: "ready"
+        });
+        showBanner("info", "Kit media sosial terbaru berhasil dibuat!");
+      } catch (err) {
+        showBanner("err", err.message);
+      }
+    });
+
+    $("addHashtagBtn").addEventListener("click", async () => {
+      const val = $("newHashtagInput").value.trim();
+      if (!val) return;
+      $("newHashtagInput").value = "";
+      await saveCurrentSocialPackage(val);
+    });
+
+    $("saveSocialBtn").addEventListener("click", () => saveCurrentSocialPackage());
+    $("copySocialBtn").addEventListener("click", async () => {
+      const txt = buildSocialPostText();
+      if (!txt) return;
+      await navigator.clipboard.writeText(txt);
+      showBanner("info", "Hook + Deskripsi + CTA + Tagar disalin ke clipboard!");
+    });
+    $("shareSocialBtn").addEventListener("click", async () => {
+      const c = getActiveCampaign();
+      const txt = buildSocialPostText();
+      if (!txt) return;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: c?.title || "PromoReel AI", text: txt });
+          return;
+        } catch {}
+      }
+      await navigator.clipboard.writeText(txt);
+      showBanner("info", "Web Share tidak tersedia di browser ini — teks promosi sudah disalin ke clipboard.");
+    });
+
+    $("liveSubStyleSelect").addEventListener("change", async (e) => {
+      const c = getActiveCampaign();
+      if (!c) return;
+      const style = e.target.value;
+      const subs = (c.subtitles || []).map((q) => ({ ...q, style }));
+      await updateCurrentCampaign({ subtitleStyle: style, subtitles: subs });
+    });
+    $("exportFormatSelect").addEventListener("change", renderSubtitlesTab);
+    $("resyncSubsBtn").addEventListener("click", async () => {
+      const c = getActiveCampaign();
+      if (!c) return;
+      const subs = autoBuildSubtitles(c.scenes || [], c.subtitleStyle || "kinetic_pop");
+      await updateCurrentCampaign({ subtitles: subs, status: "ready" });
+      showBanner("info", "Subtitle disinkronkan ulang dari narasi adegan.");
+    });
+    $("copySubsBtn").addEventListener("click", async () => {
+      const txt = $("subtitleExportPreview").textContent;
+      if (!txt) return;
+      await navigator.clipboard.writeText(txt);
+      showBanner("info", "Subtitle disalin ke clipboard.");
+    });
+    $("downloadSubsBtn").addEventListener("click", () => {
+      const c = getActiveCampaign();
+      if (!c) return;
+      const fmt = $("exportFormatSelect").value;
+      const txt = buildSubtitleFile(c.subtitles || [], fmt);
+      const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${(c.productName || "promoreel").toLowerCase().replace(/[^a-z0-9]+/g, "_")}.${fmt}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    initFirebaseFromConfig();
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "appName": "PromoReel AI",
+  "databaseId": "ai-studio-android-howitwor-69b50236-2373-4d94-b065-69fc1e19dbf8",
+  "auth": {
+    "providers": ["google.com"],
+    "anonymousAllowed": false
+  },
+  "entities": {
+    "PromoCampaign": {
+      "collectionPath": "/users/{userId}/promoCampaigns/{campaignId}",
+      "description": "User-owned AI promotional product campaign supporting VIDEO ADS, PHOTO ADS, or BOTH, storing product context, pricing/promo offer, dynamic video scenes, kinetic subtitles, multi-variation AI Photo Ads designs, viral hooks, and social media packages.",
+      "ownershipField": "userId",
+      "immutableFields": ["userId", "createdAt"],
+      "fields": {
+        "userId": { "type": "string", "required": true },
+        "title": { "type": "string", "minLength": 1, "maxLength": 140, "required": true },
+        "productName": { "type": "string", "minLength": 1, "maxLength": 120, "required": true },
+        "productDescription": { "type": "string", "maxLength": 1000, "required": true },
+        "productBenefits": { "type": "string", "maxLength": 1000, "required": true },
+        "productPhotoPreview": { "type": "string", "maxLength": 150000, "required": true },
+        "language": { "type": "enum", "values": ["id", "en"], "required": true },
+        "format": { "type": "enum", "values": ["reels_9_16", "feed_1_1", "youtube_16_9"], "required": true },
+        "visualVibe": { "type": "enum", "values": ["luxury_editorial", "dynamic_beat", "clean_minimal", "vibrant_pop"], "required": true },
+        "subtitleStyle": { "type": "enum", "values": ["kinetic_pop", "luxury_serif", "neon_highlight", "clean_glass"], "required": true },
+        "status": { "type": "enum", "values": ["draft", "generated", "edited", "ready"], "required": true },
+        "productionMode": { "type": "enum", "values": ["video", "photo", "both"], "required": false },
+        "priceText": { "type": "string", "maxLength": 80, "required": false },
+        "discountText": { "type": "string", "maxLength": 80, "required": false },
+        "promoBadgeText": { "type": "string", "maxLength": 80, "required": false },
+        "targetAudience": { "type": "string", "maxLength": 300, "required": true },
+        "musicVibe": { "type": "string", "maxLength": 160, "required": true },
+        "ctaText": { "type": "string", "maxLength": 160, "required": true },
+        "scenes": { "type": "list<map>", "maxItems": 20, "required": true },
+        "subtitles": { "type": "list<map>", "maxItems": 100, "required": true },
+        "photoAds": { "type": "list<map>", "maxItems": 10, "required": false },
+        "socialHooks": { "type": "list<map>", "maxItems": 15, "required": true },
+        "socialPackages": { "type": "list<map>", "maxItems": 8, "required": true },
+        "totalDurationSec": { "type": "int", "min": 0, "max": 600, "required": true },
+        "createdAt": { "type": "timestamp", "required": true },
+        "updatedAt": { "type": "timestamp", "required": true }
+      }
+    }
+  }
+}

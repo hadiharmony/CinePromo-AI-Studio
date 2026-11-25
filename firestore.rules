@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net: default deny everything
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidPromoCampaign(data, userId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.userId == request.auth.uid &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 140 &&
+             data.productName is string && data.productName.size() >= 1 && data.productName.size() <= 120 &&
+             data.productDescription is string && data.productDescription.size() <= 1000 &&
+             data.productBenefits is string && data.productBenefits.size() <= 1000 &&
+             data.productPhotoPreview is string && data.productPhotoPreview.size() <= 150000 &&
+             data.language is string && data.language in ['id', 'en'] &&
+             data.format is string && data.format in ['reels_9_16', 'feed_1_1', 'youtube_16_9'] &&
+             data.visualVibe is string && data.visualVibe in ['luxury_editorial', 'dynamic_beat', 'clean_minimal', 'vibrant_pop'] &&
+             data.subtitleStyle is string && data.subtitleStyle in ['kinetic_pop', 'luxury_serif', 'neon_highlight', 'clean_glass'] &&
+             data.status is string && data.status in ['draft', 'generated', 'edited', 'ready'] &&
+             (!('productionMode' in data) || (data.productionMode is string && data.productionMode in ['video', 'photo', 'both'])) &&
+             (!('priceText' in data) || (data.priceText is string && data.priceText.size() <= 80)) &&
+             (!('discountText' in data) || (data.discountText is string && data.discountText.size() <= 80)) &&
+             (!('promoBadgeText' in data) || (data.promoBadgeText is string && data.promoBadgeText.size() <= 80)) &&
+             data.targetAudience is string && data.targetAudience.size() <= 300 &&
+             data.musicVibe is string && data.musicVibe.size() <= 160 &&
+             data.ctaText is string && data.ctaText.size() <= 160 &&
+             data.scenes is list && data.scenes.size() <= 20 && (data.scenes.size() == 0 || data.scenes[0] is map) &&
+             data.subtitles is list && data.subtitles.size() <= 100 && (data.subtitles.size() == 0 || data.subtitles[0] is map) &&
+             (!('photoAds' in data) || (data.photoAds is list && data.photoAds.size() <= 10 && (data.photoAds.size() == 0 || data.photoAds[0] is map))) &&
+             data.socialHooks is list && data.socialHooks.size() <= 15 && (data.socialHooks.size() == 0 || data.socialHooks[0] is map) &&
+             data.socialPackages is list && data.socialPackages.size() <= 8 && (data.socialPackages.size() == 0 || data.socialPackages[0] is map) &&
+             data.totalDurationSec is int && data.totalDurationSec >= 0 && data.totalDurationSec <= 600 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId}/promoCampaigns/{campaignId} {
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) && isValidId(campaignId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(campaignId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'title', 'productName', 'productDescription', 'productBenefits',
+                         'productPhotoPreview', 'language', 'format', 'visualVibe', 'subtitleStyle',
+                         'status', 'targetAudience', 'musicVibe', 'ctaText', 'scenes', 'subtitles',
+                         'socialHooks', 'socialPackages', 'totalDurationSec', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'title', 'productName', 'productDescription', 'productBenefits',
+                         'productPhotoPreview', 'language', 'format', 'visualVibe', 'subtitleStyle',
+                         'status', 'productionMode', 'priceText', 'discountText', 'promoBadgeText',
+                         'targetAudience', 'musicVibe', 'ctaText', 'scenes', 'subtitles', 'photoAds',
+                         'socialHooks', 'socialPackages', 'totalDurationSec', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidPromoCampaign(incoming(), userId);
+
+      allow update: if isOwner(userId) &&
+                       isValidId(campaignId) &&
+                       isValidPromoCampaign(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'title', 'productName', 'productDescription', 'productBenefits',
+                         'productPhotoPreview', 'language', 'format', 'visualVibe', 'subtitleStyle',
+                         'status', 'productionMode', 'priceText', 'discountText', 'promoBadgeText',
+                         'targetAudience', 'musicVibe', 'ctaText', 'scenes', 'subtitles', 'photoAds',
+                         'socialHooks', 'socialPackages', 'totalDurationSec', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(campaignId);
+    }
+  }
+}

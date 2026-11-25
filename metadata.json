@@ -1,0 +1,6 @@
+{
+  "name": "PromoReel AI",
+  "description": "AI promotional product video creator: upload a product photo and optional benefits to generate dynamic aesthetic promo videos, kinetic subtitles, and complete social media hooks, captions, and hashtags.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
